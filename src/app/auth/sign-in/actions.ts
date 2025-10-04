@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { ActionError, createAction } from '@/lib/safe-action';
 import z from 'zod';
-import { flattenValidationErrors, returnValidationErrors } from 'next-safe-action';
+import { flattenValidationErrors } from 'next-safe-action';
 
 const schemaSignInInput = z.object({
     email: z.email(),
@@ -23,8 +23,12 @@ export const ActionSignInUser = createAction
 
             const { error } = await supabase.auth.signInWithPassword({ email, password })
             if (error) {
+                console.log({ error })
                 if (error.code === 'invalid_credentials') {
                     throw new ActionError('Credenciais inválidas.');
+                }
+                if (error.code === 'email_not_confirmed') {
+                    throw new ActionError('Por favor, confirme sua conta através do e-mail que enviamos.');
                 }
                 throw new Error();
             }
@@ -39,23 +43,3 @@ export const ActionSignInUser = createAction
             },
         }
     );
-
-export async function signup(formData: FormData) {
-    const supabase = await createClient()
-
-    // type-casting here for convenience
-    // in practice, you should validate your inputs
-    const data = {
-        email: formData.get('email') as string,
-        password: formData.get('password') as string,
-    }
-
-    const { error } = await supabase.auth.signUp(data)
-
-    if (error) {
-        redirect('/error')
-    }
-
-    revalidatePath('/', 'layout')
-    redirect('/')
-}

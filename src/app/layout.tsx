@@ -21,11 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <script
-        async
-        src="https://js.stripe.com/v3/pricing-table.js">
-      </script>
-      <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable} antialiased`}>
+      <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable} antialiased dark`}>
         <Suspense fallback={null}>{children}</Suspense>
         <Analytics />
         <Toaster />
