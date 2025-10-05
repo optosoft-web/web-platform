@@ -49,6 +49,7 @@ export const ActionSignUpUser = createAction
             ]).select();
 
             revalidatePath('/', 'layout')
+            // redirect('/auth/sign-in')
         },
         {
             onError: async (args) => {

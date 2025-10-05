@@ -150,12 +150,12 @@ export function FormSignIn({
                                     <FormItem>
                                         <div className="flex items-center">
                                             <FormLabel>Senha</FormLabel>
-                                            <a
-                                                href="#"
+                                            <Link
+                                                href={"/auth/forgot-password"}
                                                 className="ml-auto text-sm underline-offset-4 hover:underline"
                                             >
                                                 Esqueceu sua senha?
-                                            </a>
+                                            </Link>
                                         </div>
                                         <FormControl>
                                             <Input type="password" {...field} />
@@ -167,7 +167,7 @@ export function FormSignIn({
 
                             <div className="space-y-4">
                                 <LoadingButton
-                                    defaultText="Entre"
+                                    defaultText="Entrar"
                                     loadingText="Entrando..."
                                     isLoading={isPending}
                                     type="submit"
