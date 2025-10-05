@@ -32,9 +32,6 @@ export const ActionSignInUser = createAction
                 }
                 throw new Error();
             }
-
-            revalidatePath('/', 'layout')
-            redirect('/')
         },
         {
             onError: async (args) => {

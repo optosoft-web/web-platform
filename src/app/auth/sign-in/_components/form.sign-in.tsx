@@ -1,9 +1,7 @@
 "use client"
 
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
-import { cn } from "@/lib/utils"
+import { createCheckoutSession } from "@/actions/stripe.action"
+import { LoadingButton } from "@/components/shared/loading-button/loading-button"
 import { Button } from "@/components/ui/button"
 import {
     Card,
@@ -12,7 +10,6 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
 import {
     Form,
     FormControl,
@@ -22,15 +19,19 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form"
-import { ActionSignInUser } from "../actions"
-import { toast } from "sonner"
+import { Input } from "@/components/ui/input"
+import { cn } from "@/lib/utils"
+import { useAuthModalStore } from "@/stores/auth-modal-store"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { useAction } from "next-safe-action/hooks"
-import { Spinner } from "@/components/ui/spinner"
 import Link from "next/link"
-import { LoadingButton } from "@/components/shared/loading-button/loading-button"
+import { useRouter } from "next/navigation"
+import { useForm } from "react-hook-form"
+import { toast } from "sonner"
+import * as z from "zod"
+import { ActionSignInUser } from "../actions"
 
 
-// O schema de validação permanece o mesmo
 const schemaSignInInput = z.object({
     email: z.email().min(1, "O e-mail é obrigatório."),
     password: z.string().min(8, "A senha deve ter no mínimo 8 caracteres."),
@@ -38,8 +39,13 @@ const schemaSignInInput = z.object({
 
 export function FormSignIn({
     className,
+    showNavigationLink = true,
     ...props
-}: React.ComponentProps<"div">) {
+}: React.ComponentProps<"div"> & {
+    showNavigationLink?: boolean
+}) {
+    const { close: closeAuthModal, priceIdToGo, clearPriceId } = useAuthModalStore();
+    const router = useRouter();
 
     const form = useForm<z.infer<typeof schemaSignInInput>>({
         resolver: zodResolver(schemaSignInInput),
@@ -50,8 +56,20 @@ export function FormSignIn({
     })
 
     const { execute, isPending } = useAction(ActionSignInUser, {
-        onSuccess: (data) => {
-            toast.success("Login bem-sucedido! Redirecionando...")
+        onSuccess: async (data) => {
+            toast.success("Login bem-sucedido!");
+            closeAuthModal();
+
+            if (priceIdToGo) {
+                const result = await createCheckoutSession({
+                    priceId: priceIdToGo
+                })
+                if (result?.data?.url) {
+                    clearPriceId();
+                    router.push(result.data.url);
+                }
+
+            }
         },
         onError: ({ error }) => {
             if (error.serverError) {
@@ -155,12 +173,14 @@ export function FormSignIn({
                                     type="submit"
                                     className="w-full"
                                 />
-                                <FormDescription className="text-center">
-                                    Não possui uma conta?{" "}
-                                    <Link href="/auth/sign-up" className="underline-offset-4 hover:underline" aria-disabled={isPending}>
-                                        Registre-se
-                                    </Link>
-                                </FormDescription>
+                                {showNavigationLink && (
+                                    <FormDescription className="text-center">
+                                        Não possui uma conta?{" "}
+                                        <Link href="/auth/sign-up" className="underline-offset-4 hover:underline" aria-disabled={isPending}>
+                                            Registre-se
+                                        </Link>
+                                    </FormDescription>
+                                )}
                             </div>
                         </form>
                     </Form>

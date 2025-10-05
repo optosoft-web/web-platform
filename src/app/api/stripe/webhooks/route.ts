@@ -1,9 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { headers } from "next/headers";
+import { createClient } from "@/utils/supabase/server";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+const supabase = await createClient();
+
+async function createCustomer(name: string, email: string, id: string) {
+
+}
+
+async function createSubscription() {
+
+}
 
 export async function POST(req: NextRequest) {
   const body = await req.text();

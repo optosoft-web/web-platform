@@ -41,7 +41,7 @@ export const ActionSignUpUser = createAction
                 throw new Error();
             }
 
-            let { error: errorInsertCustomer } = await supabase.from('customers').insert([
+            let { error: errorInsertCustomer, data: insertedUser } = await supabase.from('customers').insert([
                 {
                     id: data.user?.id,
                     full_name: fullName
@@ -49,7 +49,6 @@ export const ActionSignUpUser = createAction
             ]).select();
 
             revalidatePath('/', 'layout')
-            redirect('/')
         },
         {
             onError: async (args) => {

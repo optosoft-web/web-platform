@@ -1,10 +1,7 @@
 "use client"
 
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { createCheckoutSession } from "@/actions/stripe.action"
+import { LoadingButton } from "@/components/shared/loading-button/loading-button"
 import {
     Card,
     CardContent,
@@ -12,7 +9,6 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
 import {
     Form,
     FormControl,
@@ -22,12 +18,17 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form"
-import { ActionSignUpUser } from "../actions"
-import { toast } from "sonner"
+import { Input } from "@/components/ui/input"
+import { cn } from "@/lib/utils"
+import { useAuthModalStore } from "@/stores/auth-modal-store"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { useAction } from "next-safe-action/hooks"
-import { Spinner } from "@/components/ui/spinner"
 import Link from "next/link"
-import { LoadingButton } from "@/components/shared/loading-button/loading-button"
+import { useRouter } from "next/navigation"
+import { useForm } from "react-hook-form"
+import { toast } from "sonner"
+import * as z from "zod"
+import { ActionSignUpUser } from "../actions"
 
 const schemaSignUpInput = z.object({
     fullName: z.string().min(5),
@@ -41,8 +42,13 @@ const schemaSignUpInput = z.object({
 
 export function FormSignUp({
     className,
+    showNavigationLink = true,
     ...props
-}: React.ComponentProps<"div">) {
+}: React.ComponentProps<"div"> & {
+    showNavigationLink?: boolean
+}) {
+    const router = useRouter();
+    const { close: closeAuthModal, priceIdToGo, clearPriceId } = useAuthModalStore();
 
     const form = useForm<z.infer<typeof schemaSignUpInput>>({
         resolver: zodResolver(schemaSignUpInput),
@@ -54,9 +60,21 @@ export function FormSignUp({
         },
     })
 
-    const { execute, isPending } = useAction(ActionSignUpUser, {
-        onSuccess: (data) => {
-            toast.success("Login bem-sucedido! Redirecionando...")
+    const { execute: executeSignUp, isPending, result } = useAction(ActionSignUpUser, {
+        onSuccess: async (data) => {
+            toast.success("Cadastro realizado com sucesso!");
+            closeAuthModal();
+
+            if (priceIdToGo) {
+                const result = await createCheckoutSession({
+                    priceId: priceIdToGo
+                })
+                if (result?.data?.url) {
+                    clearPriceId();
+                    router.push(result.data.url);
+                }
+
+            }
         },
         onError: ({ error }) => {
             if (error.serverError) {
@@ -68,10 +86,10 @@ export function FormSignUp({
         }
     })
 
+
     async function onSubmit(values: z.infer<typeof schemaSignUpInput>) {
-        console.log({ values })
         try {
-            execute(values);
+            executeSignUp(values);
         } catch (error) {
             console.error("Erro no login:", error)
             toast.error(String(error))
@@ -83,7 +101,7 @@ export function FormSignUp({
             <Card>
                 <CardHeader className="text-center">
                     <CardTitle className="text-xl">Crie sua conta</CardTitle>
-                    <CardDescription>Prrencha o formulário abaixo para criar sua conta</CardDescription>
+                    <CardDescription>Preencha o formulário abaixo para criar sua conta</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Form {...form}>
@@ -157,12 +175,14 @@ export function FormSignUp({
                                     type="submit"
                                     className="w-full"
                                 />
-                                <FormDescription className="text-center">
-                                    Possui uma conta?{" "}
-                                    <Link href="/auth/sign-in" className="underline-offset-4 hover:underline" aria-disabled={isPending}>
-                                        Entre por aqui
-                                    </Link>
-                                </FormDescription>
+                                {showNavigationLink && (
+                                    <FormDescription className="text-center">
+                                        Possui uma conta?{" "}
+                                        <Link href="/auth/sign-in" className="underline-offset-4 hover:underline" aria-disabled={isPending}>
+                                            Entre por aqui
+                                        </Link>
+                                    </FormDescription>
+                                )}
                             </div>
                         </form>
                     </Form>
