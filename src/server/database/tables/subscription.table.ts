@@ -32,6 +32,7 @@ export const subscriptionTable = pgTable("subscriptions", {
     currentPeriodEnd: timestamp("current_period_end", { withTimezone: true })
         .notNull()
         .default(sql`timezone('utc'::text, now())`),
+    planId: text("plan_id"),
     endedAt: timestamp("ended_at", { withTimezone: true }),
     cancelAt: timestamp("cancel_at", { withTimezone: true }),
     canceledAt: timestamp("canceled_at", { withTimezone: true }),

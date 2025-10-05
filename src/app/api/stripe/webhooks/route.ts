@@ -1,18 +1,33 @@
+import db from "@/server/database/index";
+import { subscriptionTable } from "@/server/database/tables";
+import { eq } from "drizzle-orm";
+import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
-import { headers } from "next/headers";
-import { createClient } from "@/utils/supabase/server";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
-const supabase = await createClient();
 
-async function createCustomer(name: string, email: string, id: string) {
 
+async function createSubscription(userId: string, subscriptionId: string) {
+  const newSubscription = await db.insert(subscriptionTable).values({
+    id: subscriptionId,
+    userId,
+    quantity: 1,
+    status: "active",
+  }).execute()
+
+  console.log(newSubscription)
 }
 
-async function createSubscription() {
-
+async function updateSubscription(subscriptionId: string, priceId: string, planId: string, startPeriod: number, endPeriod: number) {
+  const subscription = await db.update(subscriptionTable).set({
+    priceId,
+    planId,
+    currentPeriodStart: new Date(startPeriod),
+    currentPeriodEnd: new Date(endPeriod),
+  }).where(eq(subscriptionTable.id, subscriptionId)).execute()
+  console.log(subscription)
 }
 
 export async function POST(req: NextRequest) {
@@ -33,14 +48,22 @@ export async function POST(req: NextRequest) {
     case "checkout.session.completed":
       const session = event.data.object as Stripe.Checkout.Session;
       console.log(`Pagamento bem-sucedido para a sessão ${session.id}`);
-      // Lógica para provisionar o acesso do usuário ao serviço
-      // Ex: buscar o ID do usuário no `client_reference_id` ou `metadata` e atualizar seu status no banco de dados.
+      // console.log("nova session: ", JSON.stringify(session))
+      console.log("Criar subscription")
+      createSubscription(session.client_reference_id!, session.subscription!.toString())
       break;
 
     case "invoice.paid":
       const invoicePaid = event.data.object as Stripe.Invoice;
       // Lógica para renovações de assinatura bem-sucedidas
+      // console.log("invoice: ", JSON.stringify(invoicePaid))
       console.log(`Fatura ${invoicePaid.id} paga.`);
+      updateSubscription(invoicePaid.parent!.subscription_details!.subscription!.toString(),
+        invoicePaid.lines.data[0].pricing!.price_details!.price,
+        invoicePaid.lines.data[0].pricing!.price_details!.product,
+        invoicePaid.period_start,
+        invoicePaid.period_end,
+      )
       break;
 
     case "invoice.payment_failed":
@@ -48,7 +71,7 @@ export async function POST(req: NextRequest) {
       // Lógica para notificar o usuário sobre falha no pagamento
       console.log(`Falha no pagamento da fatura ${invoiceFailed.id}.`);
       break;
-      
+
     case 'customer.subscription.deleted':
       // Lógica para remover o acesso do usuário quando a assinatura é cancelada
       console.log('Assinatura cancelada.');
