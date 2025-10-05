@@ -21,11 +21,12 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form"
-import { ActionForgotPassword } from "../actions"
+import { ActionResetPassword } from "../actions"
 import { toast } from "sonner"
 import { useAction } from "next-safe-action/hooks"
 import Link from "next/link"
 import { LoadingButton } from "@/components/shared/loading-button/loading-button"
+import { useSearchParams } from "next/navigation"
 
 const schemaResetPasswordInput = z.object({
     password: z.string().min(8, "A senha deve ter no mínimo 8 caracteres."),
@@ -39,6 +40,12 @@ export function FormResetPassword({
     className,
     ...props
 }: React.ComponentProps<"div">) {
+    const searchParams = useSearchParams();
+    const code = searchParams.get('code') as string;
+
+    if (!code) {
+        return <p>Link de redefinição de senha inválido ou expirado.</p>;
+    }
 
     const form = useForm<z.infer<typeof schemaResetPasswordInput>>({
         resolver: zodResolver(schemaResetPasswordInput),
@@ -48,9 +55,9 @@ export function FormResetPassword({
         },
     })
 
-    const { execute, isPending } = useAction(ActionForgotPassword, {
+    const { execute, isPending } = useAction(ActionResetPassword, {
         onSuccess: (data) => {
-            toast.success("Link enviado! Verifique seu e-mail.")
+            toast.success("Senha alterada.")
         },
         onError: ({ error }) => {
             if (error.serverError) {
@@ -65,9 +72,12 @@ export function FormResetPassword({
 
     async function onSubmit(values: z.infer<typeof schemaResetPasswordInput>) {
         try {
-            // execute(values);
+            execute({
+                ...values,
+                code: code
+            });
         } catch (error) {
-            // console.error("Erro no login:", error)
+            console.log({ error })
             toast.error(String(error))
         }
     }

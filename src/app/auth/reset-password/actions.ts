@@ -7,23 +7,32 @@ import { createClient } from '@/utils/supabase/server'
 import { ActionError, createAction } from '@/lib/safe-action';
 import z from 'zod';
 import { flattenValidationErrors } from 'next-safe-action';
-import { env } from 'process';
 
-const schemaForgotPasswordInput = z.object({
-    email: z.email().min(1, "O e-mail é obrigatório."),
-})
+const schemaResetPasswordInput = z.object({
+    password: z.string().min(8, "A senha deve ter no mínimo 8 caracteres."),
+    confirmedPassWord: z.string().min(8, "A senha deve ter no mínimo 8 caracteres."),
+    code: z.string().min(1, "O código de verificação é obrigatório.")
+}).refine((data) => data.password === data.confirmedPassWord, {
+    message: "As senhas não são iguais.",
+    path: ["confirmedPassWord"],
+});
 
-export const ActionForgotPassword = createAction
-    .inputSchema(schemaForgotPasswordInput, {
+export const ActionResetPassword = createAction
+    .inputSchema(schemaResetPasswordInput, {
         handleValidationErrorsShape: async (ve) => flattenValidationErrors(ve).fieldErrors,
     })
     .action(
-        async ({ parsedInput: { email } }) => {
+        async ({ parsedInput: { password, code } }) => {
             const supabase = await createClient()
 
-            let { error } = await supabase.auth.resetPasswordForEmail(email, {
-                redirectTo: env.VERCEL_URL + '/auth/reset-password'
-            })
+            const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+
+            if (exchangeError) {
+                throw new ActionError("O link de redefinição de senha é inválido ou expirou.");
+            }
+
+            let { error } = await supabase.auth.updateUser({ password });
+            console.log({ error })
 
             if (error) {
                 if (error.code === 'email_exists') {
@@ -34,6 +43,9 @@ export const ActionForgotPassword = createAction
                 }
                 throw new Error();
             }
+
+            revalidatePath('/', 'layout');
+            redirect('/admin/dashboard')
         },
         {
             onError: async (args) => {
