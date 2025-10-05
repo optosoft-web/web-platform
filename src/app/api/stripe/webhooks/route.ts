@@ -24,8 +24,8 @@ async function updateSubscription(subscriptionId: string, priceId: string, planI
   const subscription = await db.update(subscriptionTable).set({
     priceId,
     planId,
-    currentPeriodStart: new Date(startPeriod),
-    currentPeriodEnd: new Date(endPeriod),
+    currentPeriodStart: new Date(startPeriod * 1000),
+    currentPeriodEnd: new Date(endPeriod  * 1000),
   }).where(eq(subscriptionTable.id, subscriptionId)).execute()
   console.log(subscription)
 }

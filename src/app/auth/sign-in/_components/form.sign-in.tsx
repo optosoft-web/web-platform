@@ -68,8 +68,10 @@ export function FormSignIn({
                     clearPriceId();
                     router.push(result.data.url);
                 }
-
+                return;
             }
+
+            router.push('/admin/dashboard')
         },
         onError: ({ error }) => {
             if (error.serverError) {

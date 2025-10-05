@@ -72,9 +72,12 @@ export function FormSignUp({
                 if (result?.data?.url) {
                     clearPriceId();
                     router.push(result.data.url);
+                    return;
                 }
 
             }
+
+            router.push("/auth/sign-in");
         },
         onError: ({ error }) => {
             if (error.serverError) {
