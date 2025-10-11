@@ -1,7 +1,7 @@
-import { date, pgTable, primaryKey, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
-import { authUsers } from "drizzle-orm/supabase";
-import { patientTable } from "./patient.table";
+import { pgTable, primaryKey, timestamp, uuid } from "drizzle-orm/pg-core";
 import { opticalShopTable } from "./optical-shop.table";
+import { patientTable } from "./patient.table";
+import { relations } from "drizzle-orm";
 
 export const patientOpticalShops = pgTable(
     "patient_optical_shops",
@@ -16,7 +16,18 @@ export const patientOpticalShops = pgTable(
             .notNull()
             .defaultNow(),
     },
-    (table) => ({
-        pk: primaryKey({ columns: [table.patientId, table.opticalShopId] }),
-    })
+    (table) => [
+        primaryKey({ columns: [table.patientId, table.opticalShopId] }),
+    ]
 );
+
+export const patientOpticalShopsRelations = relations(patientOpticalShops, ({ one }) => ({
+    patient: one(patientTable, {
+        fields: [patientOpticalShops.patientId],
+        references: [patientTable.id],
+    }),
+    opticalShop: one(opticalShopTable, {
+        fields: [patientOpticalShops.opticalShopId],
+        references: [opticalShopTable.id],
+    }),
+}));
