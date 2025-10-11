@@ -1,6 +1,6 @@
 "use client"
 
-import { createCheckoutSession } from "@/actions/stripe.action"
+import { createCheckoutSession } from "@/server/actions/stripe.action"
 import { LoadingButton } from "@/components/shared/loading-button/loading-button"
 import { Button } from "@/components/ui/button"
 import {

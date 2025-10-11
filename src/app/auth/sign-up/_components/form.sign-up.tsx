@@ -1,6 +1,5 @@
 "use client"
 
-import { createCheckoutSession } from "@/actions/stripe.action"
 import { LoadingButton } from "@/components/shared/loading-button/loading-button"
 import {
     Card,
@@ -29,6 +28,7 @@ import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import * as z from "zod"
 import { ActionSignUpUser } from "../actions"
+import { createCheckoutSession } from "@/server/actions/stripe.action"
 
 const schemaSignUpInput = z.object({
     fullName: z.string().min(5),
