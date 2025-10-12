@@ -1,8 +1,8 @@
-import { getSubscriptionPlans } from "@/actions/stripe.action";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { SubscribeButton } from "./SubscribeButton";
 import Stripe from "stripe";
 import { Check, Star } from "lucide-react";
+import { getSubscriptionPlans } from "@/server/actions/stripe.action";
 
 export async function PricingSection() {
   const plans = await getSubscriptionPlans();

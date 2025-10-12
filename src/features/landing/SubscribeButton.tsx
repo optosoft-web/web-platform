@@ -1,11 +1,11 @@
 "use client";
 
-import { createCheckoutSession } from "@/actions/stripe.action";
 import { useAction } from "next-safe-action/hooks";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react"; 
 import { useAuthModalStore } from "@/stores/auth-modal-store";
 import { useUser } from "@/hooks/use-user";
+import { createCheckoutSession } from "@/server/actions/stripe.action";
 
 interface SubscribeButtonProps {
   priceId: string;
