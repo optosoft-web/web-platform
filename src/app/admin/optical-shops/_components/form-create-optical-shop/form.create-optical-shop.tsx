@@ -18,8 +18,11 @@ import { toast } from "sonner"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { ActionCreateOpticalShop } from "@/server/actions/admin/optical-shop.actions";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function FormCreateOpticalShop() {
+    const queryClient = useQueryClient();
+
     const form = useForm<z.infer<typeof FormCreateOpticalShopSchema>>({
         resolver: zodResolver(FormCreateOpticalShopSchema),
         defaultValues: {
@@ -28,16 +31,18 @@ export function FormCreateOpticalShop() {
         },
     });
 
-    const { execute, isPending, result } = useAction(ActionCreateOpticalShop, {
-        onSuccess: async (data) => {
+    const { execute, isPending } = useAction(ActionCreateOpticalShop, {
+        onSuccess: async () => {
             toast.success("Cadastro realizado com sucesso!");
             form.reset();
+            await queryClient.invalidateQueries({ queryKey: ['opticalShopsDataForCards'] });
         },
         onError: ({ error }) => {
             if (error.serverError) {
                 toast.error(error.serverError)
             }
             if (error.validationErrors) {
+                toast.error(error.validationErrors._errors)
                 console.log(error.validationErrors);
             }
         }

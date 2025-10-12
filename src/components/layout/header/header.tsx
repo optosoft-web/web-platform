@@ -72,12 +72,12 @@ function HamburgerIcon({ className, ...props }: React.SVGAttributes<SVGElement>)
 }
 
 export function Header(props: HeaderProps) {
-    const supabaseClient = createClient();
     const isMobile = useIsMobile();
     const router = useRouter();
     const [session, setSession] = useState(props.initialSession);
 
     useEffect(() => {
+        console.log('render')
         const supabaseClient = createClient();
         const { data: authListener } = supabaseClient.auth.onAuthStateChange(
             (_event, session) => {
@@ -142,7 +142,7 @@ export function Header(props: HeaderProps) {
                             <DropdownMenuLabel className="p-0 font-normal">
                                 <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                                     <Avatar className="h-8 w-8 rounded-lg">
-                                        <AvatarImage src={'dd'} alt={'dd'} />
+                                        {/* <AvatarImage src={'dd'} alt={'dd'} /> */}
                                         <AvatarFallback className="rounded-lg">CN</AvatarFallback>
                                     </Avatar>
                                     <div className="grid flex-1 text-left text-sm leading-tight">
@@ -189,7 +189,7 @@ export function Header(props: HeaderProps) {
                                             <NavigationMenuItem key={index} className="w-full">
                                                 <Button
                                                     variant={'ghost'}
-                                                    onClick={(e) =>{ e.preventDefault(); router.push(link.href)}}
+                                                    onClick={(e) => { e.preventDefault(); router.push(link.href) }}
                                                     className={cn(
                                                         "flex w-full items-center rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground cursor-pointer no-underline",
                                                     )}

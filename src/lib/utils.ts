@@ -11,3 +11,5 @@ export const formatDate = (date: Date): string => {
   const year = date.getFullYear();
   return `${day}.${month}.${year}`;
 };
+
+export const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

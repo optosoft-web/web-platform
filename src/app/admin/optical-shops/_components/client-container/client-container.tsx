@@ -17,6 +17,7 @@ import { DialogCreateOpticalShop } from "../dialog-create-optical-shop/dialog.cr
 import { OpticalShopCard } from "../card-optical-shop/card-optical-shop";
 import { iOpticalShopCardProps } from "../card-optical-shop/card-optical-shop.types";
 import { ActionGetOpticalShopsForCards } from "@/server/actions/admin/optical-shop.actions";
+import { CardSkeletonOpticalShop } from "../skeletons/optical-shops-skeleton";
 
 const fetchOpticalShops = async (): Promise<iOpticalShopCardProps[]> => {
     const result = await ActionGetOpticalShopsForCards();
@@ -37,7 +38,7 @@ export function ClientContainerOpticalShops(props: iClientContainerOpticalShopsP
         initialData: props.initialOpticalShops,
         queryKey: ['opticalShopsDataForCards'],
         queryFn: fetchOpticalShops
-    })
+    });
 
     return (
         <>
@@ -67,7 +68,11 @@ export function ClientContainerOpticalShops(props: iClientContainerOpticalShopsP
             </div>
             {/* cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {query.data?.map((item, i) => (
+                {(query.isRefetching || query.isLoading) ? (
+                    Array.from({ length: query.data?.length ?? 3 }).map((_, i) => (
+                        <CardSkeletonOpticalShop key={`card-optical-shop-skeleton-${i}`} />
+                    ))
+                ) : query.data?.map((item, i) => (
                     <OpticalShopCard
                         key={`optical-shop-card-${item.id}-${i}`}
                         {...item}
