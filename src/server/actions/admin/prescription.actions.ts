@@ -5,19 +5,21 @@ import { and, eq } from "drizzle-orm";
 import db from "@/server/database/index";
 import { patientTable, prescriptionTable } from "@/server/database/tables";
 import { authMiddleware, createAction } from "@/lib/safe-action";
+import { revalidatePath } from "next/cache";
 
 const createPrescriptionSchema = z.object({
-    patientId: z.string() ,
-    rightEyeSpherical: z.number().optional().transform(val => val !== undefined ? String(val) : undefined),
-    rightEyeCylindrical: z.number().optional().transform(val => val !== undefined ? String(val) : undefined),
+    patientId: z.string(),
+    rightEyeSpherical: z.number().optional(),
+    rightEyeCylindrical: z.number().optional(),
     rightEyeAxis: z.number().int().optional(),
-    leftEyeSpherical: z.number().optional().transform(val => val !== undefined ? String(val) : undefined),
-    leftEyeCylindrical: z.number().optional().transform(val => val !== undefined ? String(val) : undefined),
-    leftEyeAxis: z.number().int().optional(), 
-    addition: z.number().optional().transform(val => val !== undefined ? String(val) : undefined),
+    leftEyeSpherical: z.number().optional(),
+    leftEyeCylindrical: z.number().optional(),
+    leftEyeAxis: z.number().int().optional(),
+    addition: z.number().optional(),
     notes: z.string().optional(),
     prescriptionDate: z.string(),
 });
+
 
 export const createPrescription = createAction.inputSchema(createPrescriptionSchema).use(authMiddleware).action(
     async ({ parsedInput, ctx }) => {
@@ -38,9 +40,16 @@ export const createPrescription = createAction.inputSchema(createPrescriptionSch
             const [newPrescription] = await db.insert(prescriptionTable).values({
                 ...parsedInput,
                 userId: user.id,
+                rightEyeSpherical: parsedInput.rightEyeSpherical?.toString(),
+                rightEyeCylindrical: parsedInput.rightEyeCylindrical?.toString(),
+                leftEyeSpherical: parsedInput.leftEyeSpherical?.toString(),
+                leftEyeCylindrical: parsedInput.leftEyeCylindrical?.toString(),
+                addition: parsedInput.addition?.toString(),
             }).returning();
 
+            revalidatePath('/admin/patients', 'page')
             return newPrescription;
+
         } catch (error) {
             console.error("Erro ao criar prescrição:", error);
             throw new Error("Não foi possível salvar a prescrição.");
@@ -91,7 +100,7 @@ export const deletePrescription = createAction.inputSchema(deletePrescriptionSch
                 .where(
                     and(
                         eq(prescriptionTable.id, parsedInput.id),
-                        eq(prescriptionTable.userId, ctx.user.id) 
+                        eq(prescriptionTable.userId, ctx.user.id)
                     )
                 )
                 .returning({ id: prescriptionTable.id });

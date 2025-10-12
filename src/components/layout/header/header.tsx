@@ -35,6 +35,7 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from '@/components/ui/popover';
+import { useRouter } from "next/navigation";
 
 type HeaderProps = {
     initialSession: Session | null;
@@ -72,7 +73,8 @@ function HamburgerIcon({ className, ...props }: React.SVGAttributes<SVGElement>)
 
 export function Header(props: HeaderProps) {
     const supabaseClient = createClient();
-    const isMobile = useIsMobile()
+    const isMobile = useIsMobile();
+    const router = useRouter();
     const [session, setSession] = useState(props.initialSession);
 
     useEffect(() => {
@@ -187,7 +189,7 @@ export function Header(props: HeaderProps) {
                                             <NavigationMenuItem key={index} className="w-full">
                                                 <Button
                                                     variant={'ghost'}
-                                                    onClick={(e) => e.preventDefault()}
+                                                    onClick={(e) =>{ e.preventDefault(); router.push(link.href)}}
                                                     className={cn(
                                                         "flex w-full items-center rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground cursor-pointer no-underline",
                                                     )}

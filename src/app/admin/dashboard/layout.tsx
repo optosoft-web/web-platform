@@ -16,22 +16,6 @@ export default async function AdminLayout({
 }: {
     children: React.ReactNode
 }) {
-    const subscription = await getUserSubscription();
-
-    const invalidStatus = [
-        "canceled",
-        "incomplete",
-        "incomplete_expired",
-        "past_due",
-        "unpaid",
-    ];
-
-    const currentStatus = subscription.data?.status;
-
-    if (currentStatus && invalidStatus.indexOf(currentStatus) !== -1) {
-        console.log("A assinatura tem um status inválido:", currentStatus);
-    }
-
     return (
         <html lang="pt-BR">
             <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable} antialiased dark`}>

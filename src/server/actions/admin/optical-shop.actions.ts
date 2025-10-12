@@ -1,7 +1,7 @@
 "use server";
 
 import { z } from "zod";
-import { and, asc, count, eq } from "drizzle-orm";
+import { and, asc, count, eq, ilike } from "drizzle-orm";
 import db from "@/server/database/index";
 import { opticalShopTable, patientOpticalShops } from "@/server/database/tables";
 import { authMiddleware, createAction } from "@/lib/safe-action";
@@ -78,6 +78,28 @@ export const ActionGetOpticalShops = createAction.use(authMiddleware).action(
     }
   }
 );
+
+const searchOpticalShopsSchema = z.object({
+  query: z.string(),
+});
+
+export const searchOpticalShops = createAction
+  .inputSchema(searchOpticalShopsSchema)
+  .use(authMiddleware)
+  .action(async ({ parsedInput, ctx }) => {
+    if (parsedInput.query.length === 0) return [];
+    try {
+      return await db.query.opticalShopTable.findMany({
+        where: and(
+          eq(opticalShopTable.userId, ctx.user.id),
+          ilike(opticalShopTable.name, `%${parsedInput.query}%`)
+        ),
+        limit: 5,
+      });
+    } catch (error) {
+      return [];
+    }
+  });
 
 const updateOpticalShopSchema = opticalShopSchema.extend({
   id: z.string(),
