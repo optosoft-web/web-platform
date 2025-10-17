@@ -49,6 +49,7 @@ export const ActionGetOpticalShopsForCards = createAction.use(authMiddleware).ac
         .groupBy(opticalShopTable.id)
         .orderBy(asc(opticalShopTable.name));
 
+      //@ts-ignore
       const shops: iOpticalShopCardProps[] = shopsData.map((shop) => ({
         ...shop,
         totalPatients: Number(shop.totalPatients),
@@ -104,7 +105,7 @@ export const searchOpticalShops = createAction
 const updateOpticalShopSchema = opticalShopSchema.extend({
   id: z.string(),
 });
-export const updateOpticalShop = createAction.inputSchema(updateOpticalShopSchema).use(authMiddleware).action(
+export const ActionUpdateOpticalShop = createAction.inputSchema(updateOpticalShopSchema).use(authMiddleware).action(
   async ({ parsedInput, ctx }) => {
     try {
       const [updatedShop] = await db.update(opticalShopTable)

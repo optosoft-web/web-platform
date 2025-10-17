@@ -24,14 +24,9 @@ export function OpticalShopsPageSkeleton() {
 
             {/* Skeleton do Grid de Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                <CardSkeletonOpticalShop />
-                <CardSkeletonOpticalShop />
-                <CardSkeletonOpticalShop />
-                <CardSkeletonOpticalShop />
-                <CardSkeletonOpticalShop />
-                <CardSkeletonOpticalShop />
-                <CardSkeletonOpticalShop />
-                <CardSkeletonOpticalShop />
+                {Array.from({ length: 6 }).map((_, i) => (
+                    <CardSkeletonOpticalShop key={`card-skeleton-optical-shops-${i}`} />
+                ))}
             </div>
         </>
     );

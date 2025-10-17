@@ -1,7 +1,17 @@
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { iOpticalShopCardProps, iTopicProps } from "./card-optical-shop.types";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { EllipsisVertical } from "lucide-react";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { cn } from "@/lib/utils";
+import { DialogEditOpticalShop } from "../dialog-edit-optical-shop/dialog.edit-optical-shop";
+import { useState } from "react";
 
 function Topic(props: iTopicProps) {
     return (
@@ -13,22 +23,34 @@ function Topic(props: iTopicProps) {
 }
 
 export function OpticalShopCard(props: iOpticalShopCardProps) {
+    const [dialogEditIsOpen, setDialogEditIsOpen] = useState(false);
+
     return (
         <Card className="w-full shadow-none p-0">
             <CardHeader className="flex flex-row items-center justify-between pt-6">
                 <CardTitle className="flex justify-between w-full">
                     <h2 className="font-semibold text-xl">{props.name}</h2>
                     <div>
-                        <Button variant={'ghost'}>
-                            <EllipsisVertical />
-                        </Button>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger className={buttonVariants({ variant: 'ghost' })}>
+                                <EllipsisVertical />
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                                <DropdownMenuItem onClick={() => setDialogEditIsOpen(true)}>Editar</DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem className={cn(
+                                    buttonVariants({ variant: 'destructive', size: 'sm' }),
+                                    'w-full justify-start'
+                                )}>Excluir</DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                 </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
                 <div className="px-6 space-y-2">
                     <Topic label="Total de Pacientes" value={props.totalPatients} />
-                    <Topic label="Endereço" value={props.address ?? '-'} />
+                    <Topic label="Endereço" value={props.address || '-'} />
                 </div>
             </CardContent>
             <CardFooter className="border-t flex px-6 pb-0 py-2!">
@@ -37,6 +59,12 @@ export function OpticalShopCard(props: iOpticalShopCardProps) {
                     <div className="">{props.createdAt}</div>
                 </div>
             </CardFooter>
+            {/* DIALOGS */}
+            <DialogEditOpticalShop
+                isOpen={dialogEditIsOpen}
+                onOpenChange={setDialogEditIsOpen}
+                opticalShopData={{ id: props.id, name: props.name, address: props.address }}
+            />
         </Card>
     );
 }

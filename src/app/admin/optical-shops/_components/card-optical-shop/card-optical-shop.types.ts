@@ -6,7 +6,7 @@ export interface iTopicProps {
 export interface iOpticalShopCardProps {
     id: string;
     name: string;
-    address: string | null;
+    address: string | undefined;
     totalPatients: number;
     createdAt: string;
 }
