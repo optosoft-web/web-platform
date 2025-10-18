@@ -1,7 +1,7 @@
 "use server";
 
 import { z } from "zod";
-import { and, eq, ilike, sql } from "drizzle-orm";
+import { and, count, eq, ilike, or, sql } from "drizzle-orm";
 import db from "@/server/database/index";
 import { patientTable, prescriptionTable, opticalShopTable, patientOpticalShops } from "@/server/database/tables";
 import { ActionError, authMiddleware, createAction } from "@/lib/safe-action";
@@ -66,39 +66,86 @@ export const getPatients = createAction.use(authMiddleware).action(
     }
 )
 
+// 1. Schema de entrada mais robusto
 const searchPatientsSchema = z.object({
-    query: z.string(),
+    query: z.string().optional(),
+    limit: z.number().min(1).max(100).default(10),
+    offset: z.number().min(0).default(0),
+    sortColumn: z.string().optional(),
+    sortOrder: z.enum(["asc", "desc"]).optional(),
 });
 
-export const searchPatients = createAction
+export const ActionSearchPatients = createAction
     .inputSchema(searchPatientsSchema)
     .use(authMiddleware)
     .action(async ({ parsedInput, ctx }) => {
         try {
-            if (parsedInput.query.length === 0) {
-                return [];
-            }
+            const { limit, offset, query, sortColumn, sortOrder } = parsedInput;
 
-            const patients = await db.query.patientTable.findMany({
-                where: and(
-                    eq(patientTable.userId, ctx.user.id),
-                    ilike(patientTable.fullName, `%${parsedInput.query}%`)
-                ),
-                limit: 5,
+            // 2. Construção dinâmica da cláusula 'where'
+            const whereConditions = and(
+                eq(patientTable.userId, ctx.user.id),
+                query // Se 'query' existir, busca em múltiplos campos
+                    ? or(
+                        ilike(patientTable.fullName, `%${query}%`),
+                        ilike(patientTable.contactInfo, `%${query}%`)
+                    )
+                    : undefined
+            );
+
+            // 3. Busca dos pacientes com paginação e ordenação
+            const patientsQuery = db.query.patientTable.findMany({
+                where: whereConditions,
+                limit,
+                offset,
+                orderBy: (table, { asc, desc }) => {
+                    if (!sortColumn) return desc(table.createdAt); // Ordem padrão
+
+                    const orderFunction = sortOrder === 'asc' ? asc : desc;
+
+                    // Mapeia a string do frontend para a coluna do Drizzle
+                    switch (sortColumn) {
+                        case 'fullName':
+                            return orderFunction(table.fullName);
+                        case 'dateOfBirth':
+                            return orderFunction(table.dateOfBirth);
+                        case 'createdAt':
+                            return orderFunction(table.createdAt);
+                        default:
+                            return desc(table.createdAt);
+                    }
+                },
             });
-            return patients;
+
+            // 4. Busca do total de registros para a paginação
+            const totalCountQuery = db
+                .select({ count: count() })
+                .from(patientTable)
+                .where(whereConditions);
+
+            // Executa as duas queries em paralelo para mais eficiência
+            const [patients, totalCountResult] = await Promise.all([
+                patientsQuery,
+                totalCountQuery,
+            ]);
+
+            const total = totalCountResult[0]?.count ?? 0;
+
+            // 5. Retorna os dados e o total
+            return {
+                data: patients,
+                totalCount: total,
+            };
+
         } catch (error) {
             console.error("Erro ao buscar pacientes:", error);
-            return [];
+            throw new Error("Não foi possível buscar os pacientes.");
         }
     });
 
 const getPatientDetailsSchema = z.object({
     id: z.string(),
 });
-
-
-
 export const getPatientDetails = createAction.inputSchema(getPatientDetailsSchema).use(authMiddleware).action(
     async ({ parsedInput, ctx }) => {
         try {
