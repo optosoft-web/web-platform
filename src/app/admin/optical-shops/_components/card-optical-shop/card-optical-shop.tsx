@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { DialogEditOpticalShop } from "../dialog-edit-optical-shop/dialog.edit-optical-shop";
 import { useState } from "react";
 import { DialogDeleteOpticalShop } from "../dialog-delete-optical-shop/dialog.delete-optical-shop";
+import Link from "next/link";
 
 function Topic(props: iTopicProps) {
     return (
@@ -31,7 +32,9 @@ export function OpticalShopCard(props: iOpticalShopCardProps) {
         <Card className="w-full shadow-none p-0">
             <CardHeader className="flex flex-row items-center justify-between pt-6">
                 <CardTitle className="flex justify-between w-full">
-                    <h2 className="font-semibold text-xl">{props.name}</h2>
+                    <Link href={`/admin/optical-shop/${props.id}`} className="hover:underline">
+                        <h2 className="font-semibold text-xl">{props.name}</h2>
+                    </Link>
                     <div>
                         <DropdownMenu>
                             <DropdownMenuTrigger className={buttonVariants({ variant: 'ghost' })}>

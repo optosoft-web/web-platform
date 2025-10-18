@@ -1,4 +1,5 @@
 import { Header } from "@/components/layout/header/header";
+import { QueryProvider } from "@/components/shared/query-provider/query-provider";
 import { getUserSubscription } from "@/server/actions/admin/subscription.action";
 
 type AdminLayoutProps = {
@@ -27,10 +28,12 @@ export default async function AdminLayout(props: AdminLayoutProps) {
 
     return (
         <div className="grid grid-rows-[64px_1fr]">
-            <Header initialSession={null} />
-            <div className="container mx-auto px-4">
-                {props.children}
-            </div>
+            <QueryProvider>
+                <Header initialSession={null} />
+                <div className="container mx-auto px-4">
+                    {props.children}
+                </div>
+            </QueryProvider>
         </div>
     )
 }

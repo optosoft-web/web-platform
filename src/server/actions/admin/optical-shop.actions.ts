@@ -80,6 +80,23 @@ export const ActionGetOpticalShops = createAction.use(authMiddleware).action(
   }
 );
 
+const actionGetOpticalShopByIdSchema = z.object({
+  id: z.string().min(2)
+});
+export const ActionGetOpticalShopById = createAction.inputSchema(actionGetOpticalShopByIdSchema).use(authMiddleware).action(
+  async ({ parsedInput, ctx }) => {
+    try {
+      const shop = await db.query.opticalShopTable.findFirst({
+        where: eq(opticalShopTable.id, parsedInput.id)
+      })
+      return shop;
+    } catch (error) {
+      console.error("Erro ao buscar ótica:", error);
+      throw new Error("Não foi possível buscar as óticas.");
+    }
+  }
+);
+
 const searchOpticalShopsSchema = z.object({
   query: z.string(),
 });
