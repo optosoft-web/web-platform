@@ -1,12 +1,11 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 
 import { createClient } from '@/utils/supabase/server'
 import { ActionError, createAction } from '@/lib/safe-action';
 import z from 'zod';
-import { flattenValidationErrors, returnValidationErrors } from 'next-safe-action';
+import { flattenValidationErrors } from 'next-safe-action';
 
 const schemaSignUpInput = z.object({
     fullName: z.string().min(5),
@@ -26,7 +25,7 @@ export const ActionSignUpUser = createAction
         async ({ parsedInput: { fullName, email, password } }) => {
             const supabase = await createClient()
 
-            let { data, error: errorSignUp } = await supabase.auth.signUp({
+            const { data, error: errorSignUp } = await supabase.auth.signUp({
                 email,
                 password
             })
@@ -41,7 +40,7 @@ export const ActionSignUpUser = createAction
                 throw new Error();
             }
 
-            let { error: errorInsertCustomer, data: insertedUser } = await supabase.from('customers').insert([
+            const { } = await supabase.from('customers').insert([
                 {
                     id: data.user?.id,
                     full_name: fullName

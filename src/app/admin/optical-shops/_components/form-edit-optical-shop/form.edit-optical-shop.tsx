@@ -95,8 +95,8 @@ export function FormEditOpticalShop(props: iFormEditOpticalShopProps) {
 
                 <div className="space-y-4">
                     <LoadingButton
-                        defaultText="Cadastrar"
-                        loadingText="Cadastrando..."
+                        defaultText="Editar"
+                        loadingText="Editando..."
                         isLoading={isPending}
                         type="submit"
                         className="w-full"

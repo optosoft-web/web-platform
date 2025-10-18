@@ -12,6 +12,7 @@ import {
 import { cn } from "@/lib/utils";
 import { DialogEditOpticalShop } from "../dialog-edit-optical-shop/dialog.edit-optical-shop";
 import { useState } from "react";
+import { DialogDeleteOpticalShop } from "../dialog-delete-optical-shop/dialog.delete-optical-shop";
 
 function Topic(props: iTopicProps) {
     return (
@@ -24,6 +25,7 @@ function Topic(props: iTopicProps) {
 
 export function OpticalShopCard(props: iOpticalShopCardProps) {
     const [dialogEditIsOpen, setDialogEditIsOpen] = useState(false);
+    const [dialogDeleteIsOpen, setDialogDeleteIsOpen] = useState(false);
 
     return (
         <Card className="w-full shadow-none p-0">
@@ -41,7 +43,7 @@ export function OpticalShopCard(props: iOpticalShopCardProps) {
                                 <DropdownMenuItem className={cn(
                                     buttonVariants({ variant: 'destructive', size: 'sm' }),
                                     'w-full justify-start'
-                                )}>Excluir</DropdownMenuItem>
+                                )} onClick={() => setDialogDeleteIsOpen(true)}>Excluir</DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
                     </div>
@@ -64,6 +66,11 @@ export function OpticalShopCard(props: iOpticalShopCardProps) {
                 isOpen={dialogEditIsOpen}
                 onOpenChange={setDialogEditIsOpen}
                 opticalShopData={{ id: props.id, name: props.name, address: props.address }}
+            />
+            <DialogDeleteOpticalShop
+                isOpen={dialogDeleteIsOpen}
+                onOpenChange={setDialogDeleteIsOpen}
+                opticalShopData={{ id: props.id, name: props.name, totalPatient: props.totalPatients }}
             />
         </Card>
     );

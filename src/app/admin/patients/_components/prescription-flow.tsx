@@ -29,15 +29,15 @@ export function PrescriptionFlow() {
   const handlePatientSelect = (patient: FullPatient | null) => {
     setSelectedPatient(patient);
     if (patient) {
-      setMode("search"); 
+      setMode("search");
       console.log("Paciente selecionado:", patient.id);
 
     }
   };
 
-  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
+  const [selectedPatientId,] = useState<string | null>(null);
 
-  const { data: patientDetails, isLoading } = useQuery({
+  const { } = useQuery({
     queryKey: ['patientDetails', selectedPatientId],
     queryFn: () => getPatientDetails({ id: selectedPatientId! }),
     enabled: !!selectedPatientId,

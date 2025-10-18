@@ -43,10 +43,6 @@ export function FormResetPassword({
     const searchParams = useSearchParams();
     const code = searchParams.get('code') as string;
 
-    if (!code) {
-        return <p>Link de redefinição de senha inválido ou expirado.</p>;
-    }
-
     const form = useForm<z.infer<typeof schemaResetPasswordInput>>({
         resolver: zodResolver(schemaResetPasswordInput),
         defaultValues: {
@@ -56,7 +52,7 @@ export function FormResetPassword({
     })
 
     const { execute, isPending } = useAction(ActionResetPassword, {
-        onSuccess: (data) => {
+        onSuccess: () => {
             toast.success("Senha alterada.")
         },
         onError: ({ error }) => {
@@ -69,6 +65,10 @@ export function FormResetPassword({
             }
         }
     })
+
+    if (!code) {
+        return <p>Link de redefinição de senha inválido ou expirado.</p>;
+    }
 
     async function onSubmit(values: z.infer<typeof schemaResetPasswordInput>) {
         try {

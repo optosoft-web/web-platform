@@ -109,7 +109,7 @@ export const getPatientDetails = createAction.inputSchema(getPatientDetailsSchem
                 ),
                 with: {
                     prescriptions: {
-                        // @ts-ignore
+                        // @ts-expect-error error
                         orderBy: (prescriptions, { desc }) => [desc(prescriptions.prescriptionDate)]
                     },
                     patientOpticalShops: {

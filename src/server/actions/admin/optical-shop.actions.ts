@@ -49,7 +49,7 @@ export const ActionGetOpticalShopsForCards = createAction.use(authMiddleware).ac
         .groupBy(opticalShopTable.id)
         .orderBy(asc(opticalShopTable.name));
 
-      //@ts-ignore
+      //@ts-expect-error diff interface
       const shops: iOpticalShopCardProps[] = shopsData.map((shop) => ({
         ...shop,
         totalPatients: Number(shop.totalPatients),
@@ -98,6 +98,7 @@ export const searchOpticalShops = createAction
         limit: 5,
       });
     } catch (error) {
+      console.error(error)
       return [];
     }
   });
@@ -137,7 +138,7 @@ export const ActionUpdateOpticalShop = createAction.inputSchema(updateOpticalSho
 const deleteOpticalShopSchema = z.object({
   id: z.string(),
 });
-export const deleteOpticalShop = createAction.inputSchema(deleteOpticalShopSchema).use(authMiddleware).action(
+export const ActionDeleteOpticalShop = createAction.inputSchema(deleteOpticalShopSchema).use(authMiddleware).action(
   async ({ parsedInput, ctx }) => {
     try {
       const shop = await db.query.opticalShopTable.findFirst({

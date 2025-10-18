@@ -1,11 +1,8 @@
 "use client";
 
-import { iClientContainerOpticalShopsProps, iQueryContainerProps } from "./client-container.types";
+import { iClientContainerOpticalShopsProps } from "./client-container.types";
 import {
     useQuery,
-    useQueryClient,
-    QueryClient,
-    QueryClientProvider,
 } from '@tanstack/react-query'
 import { Input } from "@/components/ui/input";
 import { Grid2x2, List } from "lucide-react";

@@ -1,4 +1,3 @@
-import { GalleryVerticalEnd } from 'lucide-react'
 import { FormForgotPassword } from './_components/form.forgot-password'
 import { AppLogo } from '@/components/shared/app-logo/app-logo'
 

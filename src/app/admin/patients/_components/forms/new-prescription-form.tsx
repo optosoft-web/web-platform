@@ -4,7 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
     Form,
@@ -25,7 +24,6 @@ import { Input } from "@/components/ui/input";
 import {
     Card,
     CardContent,
-    CardDescription,
     CardFooter,
     CardHeader,
     CardTitle,
@@ -64,8 +62,6 @@ const formSchema = z.object({
 type PrescriptionFormValues = z.infer<typeof formSchema>;
 
 export function NewPrescriptionForm({ patients }: NewPrescriptionFormProps) {
-    const router = useRouter();
-
     const form = useForm<PrescriptionFormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -74,8 +70,8 @@ export function NewPrescriptionForm({ patients }: NewPrescriptionFormProps) {
         },
     });
 
-    const { execute, status } = useAction(createPrescription, {
-        onSuccess: (data) => {
+    const { execute } = useAction(createPrescription, {
+        onSuccess: () => {
             toast.success(`Prescrição criada para o paciente.`);
             // router.push(`/admin/patients/${data.data.patientId}`);
             form.reset();
@@ -113,7 +109,7 @@ export function NewPrescriptionForm({ patients }: NewPrescriptionFormProps) {
 
                         <div>
                             <FormLabel className="font-bold text-md lg:hidden mb-2 block">OD</FormLabel>
-                            <div className="flex w-full items-start gap-3"> 
+                            <div className="flex w-full items-start gap-3">
 
                                 <FormField
                                     control={form.control}

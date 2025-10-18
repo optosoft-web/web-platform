@@ -31,7 +31,7 @@ export const ActionResetPassword = createAction
                 throw new ActionError("O link de redefinição de senha é inválido ou expirou.");
             }
 
-            let { error } = await supabase.auth.updateUser({ password });
+            const { error } = await supabase.auth.updateUser({ password });
             console.log({ error })
 
             if (error) {

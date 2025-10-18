@@ -25,7 +25,7 @@ async function updateSubscription(subscriptionId: string, priceId: string, planI
     priceId,
     planId,
     currentPeriodStart: new Date(startPeriod * 1000),
-    currentPeriodEnd: new Date(endPeriod  * 1000),
+    currentPeriodEnd: new Date(endPeriod * 1000),
   }).where(eq(subscriptionTable.id, subscriptionId)).execute()
   console.log(subscription)
 }
@@ -38,9 +38,15 @@ export async function POST(req: NextRequest) {
 
   try {
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
-  } catch (err: any) {
-    console.error(`⚠️  Webhook signature verification failed: ${err.message}`);
-    return new NextResponse(`Webhook Error: ${err.message}`, { status: 400 });
+  } catch (err) {
+    if (err instanceof Error) {
+      console.error(`⚠️  Webhook signature verification failed: ${err.message}`);
+      return new NextResponse(`Webhook Error: ${err.message}`, { status: 400 });
+    } else {
+      // Handle cases where the thrown value is not an Error object
+      console.error('⚠️  An unexpected error occurred', err);
+      return new NextResponse('Webhook Error: An unknown error occurred', { status: 500 });
+    }
   }
 
   // Lide com os diferentes tipos de eventos

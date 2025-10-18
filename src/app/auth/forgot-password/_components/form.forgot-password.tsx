@@ -4,7 +4,6 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
 import {
     Card,
     CardContent,
@@ -45,7 +44,7 @@ export function FormForgotPassword({
     })
 
     const { execute, isPending } = useAction(ActionForgotPassword, {
-        onSuccess: (data) => {
+        onSuccess: () => {
             toast.success("Link enviado! Verifique seu e-mail.")
         },
         onError: ({ error }) => {

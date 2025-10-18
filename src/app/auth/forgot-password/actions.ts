@@ -1,8 +1,5 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
-
 import { createClient } from '@/utils/supabase/server'
 import { ActionError, createAction } from '@/lib/safe-action';
 import z from 'zod';
@@ -21,7 +18,7 @@ export const ActionForgotPassword = createAction
         async ({ parsedInput: { email } }) => {
             const supabase = await createClient()
 
-            let { error } = await supabase.auth.resetPasswordForEmail(email, {
+            const { error } = await supabase.auth.resetPasswordForEmail(email, {
                 redirectTo: env.VERCEL_URL + '/auth/reset-password'
             })
 

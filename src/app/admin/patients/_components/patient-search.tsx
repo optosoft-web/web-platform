@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { Check, ChevronsUpDown, Loader2, UserPlus } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -94,7 +93,7 @@ export function PatientSearch({ selectedPatient, onPatientSelect, onNewPatientRe
                 <small>Nenhum paciente encontrado.</small>
                 <Button variant="ghost" className="mt-2 h-auto py-1" onClick={handleCreateNew}>
                   <UserPlus className="mr-2 h-4 w-4" />
-                  Cadastrar novo paciente: <br /> "{query}"
+                  Cadastrar novo paciente: <br /> &quot;{query}&quot;
                 </Button>
               </CommandEmpty>
             )}

@@ -56,7 +56,7 @@ export function FormSignIn({
     })
 
     const { execute, isPending } = useAction(ActionSignInUser, {
-        onSuccess: async (data) => {
+        onSuccess: async () => {
             toast.success("Login bem-sucedido!");
             closeAuthModal();
 

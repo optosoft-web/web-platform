@@ -1,4 +1,3 @@
-import { GalleryVerticalEnd } from 'lucide-react'
 import { FormSignUp } from './_components/form.sign-up'
 import { AppLogo } from '@/components/shared/app-logo/app-logo'
 

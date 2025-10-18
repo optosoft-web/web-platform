@@ -60,8 +60,8 @@ export function FormSignUp({
         },
     })
 
-    const { execute: executeSignUp, isPending, result } = useAction(ActionSignUpUser, {
-        onSuccess: async (data) => {
+    const { execute: executeSignUp, isPending } = useAction(ActionSignUpUser, {
+        onSuccess: async () => {
             toast.success("Cadastro realizado com sucesso!");
             closeAuthModal();
 

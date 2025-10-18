@@ -14,7 +14,6 @@ import { createPatient } from "@/server/actions/admin/patient.actions";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { OpticalShopSearch } from "../optical-shop-search";
 import { OpticalShopSelect } from "../optical-shop-select";
 
 // Schema de validação do formulário
@@ -28,8 +27,8 @@ const createPatientFormSchema = z.object({
 type CreatePatientFormValues = z.infer<typeof createPatientFormSchema>;
 
 interface CreatePatientFormProps {
-  initialName?: string; 
-  onPatientCreated: (patient: { id: string, fullName: string }) => void; 
+  initialName?: string;
+  onPatientCreated: (patient: { id: string, fullName: string }) => void;
 }
 
 export function CreatePatientForm({ initialName = "", onPatientCreated }: CreatePatientFormProps) {
@@ -46,7 +45,7 @@ export function CreatePatientForm({ initialName = "", onPatientCreated }: Create
   const { execute, status } = useAction(createPatient, {
     onSuccess: (data) => {
       toast.success(`Paciente "${data.data.fullName}" criado com sucesso!`);
-      onPatientCreated(data.data); 
+      onPatientCreated(data.data);
     },
     onError: (error) => {
       toast.error(error.error.serverError || "Falha ao criar paciente.");
@@ -82,12 +81,12 @@ export function CreatePatientForm({ initialName = "", onPatientCreated }: Create
             <FormItem>
               <FormLabel>Ótica de Origem</FormLabel>
               <FormControl>
-                 <OpticalShopSelect 
-                    value={field.value}
-                    onShopSelect={(shopId) => {
-                      field.onChange(shopId);
-                    }}
-                 />
+                <OpticalShopSelect
+                  value={field.value}
+                  onShopSelect={(shopId) => {
+                    field.onChange(shopId);
+                  }}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

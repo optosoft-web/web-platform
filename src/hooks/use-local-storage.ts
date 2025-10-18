@@ -9,6 +9,7 @@ function getStorageValue<T>(key: string, defaultValue: T): T {
       try {
         return JSON.parse(saved) as T;
       } catch (e) {
+        console.error(e);
         return defaultValue;
       }
     }

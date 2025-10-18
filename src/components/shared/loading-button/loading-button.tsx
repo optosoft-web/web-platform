@@ -3,8 +3,6 @@ import { Spinner } from "@/components/ui/spinner";
 import { VariantProps } from "class-variance-authority"
 
 export function LoadingButton({
-    variant,
-    size,
     isLoading = false,
     defaultText,
     loadingText,
