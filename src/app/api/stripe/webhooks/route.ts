@@ -17,7 +17,6 @@ async function createSubscription(userId: string, subscriptionId: string) {
     status: "active",
   }).execute()
 
-  console.log(newSubscription)
 }
 
 async function updateSubscription(subscriptionId: string, priceId: string, planId: string, startPeriod: number, endPeriod: number) {
