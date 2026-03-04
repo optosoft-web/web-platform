@@ -71,7 +71,7 @@ export const ActionGetDashboardData = createAction
                 and(
                     eq(patientTable.userId, userId),
                     gte(patientTable.createdAt, startOfLastMonth),
-                    sql`${patientTable.createdAt} <= ${endOfLastMonth}`
+                    sql`${patientTable.createdAt} <= ${endOfLastMonth.toISOString()}`
                 )
             );
 
@@ -82,7 +82,7 @@ export const ActionGetDashboardData = createAction
                 and(
                     eq(prescriptionTable.userId, userId),
                     gte(prescriptionTable.createdAt, startOfLastMonth),
-                    sql`${prescriptionTable.createdAt} <= ${endOfLastMonth}`
+                    sql`${prescriptionTable.createdAt} <= ${endOfLastMonth.toISOString()}`
                 )
             );
 

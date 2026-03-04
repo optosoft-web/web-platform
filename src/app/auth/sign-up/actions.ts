@@ -36,13 +36,14 @@ export const ActionSignUpUser = createAction
             })
 
             if (errorSignUp) {
-                if (errorSignUp.code === 'email_exists') {
+                console.error("Supabase signUp error:", errorSignUp.code, errorSignUp.message);
+                if (errorSignUp.code === 'email_exists' || errorSignUp.code === 'user_already_exists') {
                     throw new ActionError('O e-mail informado já existe.');
                 }
                 if (errorSignUp.code === 'email_address_invalid') {
                     throw new ActionError('O e-mail informado é inválido.');
                 }
-                throw new Error();
+                throw new ActionError(errorSignUp.message || 'Erro ao criar conta. Tente novamente.');
             }
 
             const { } = await supabase.from('customers').insert([
