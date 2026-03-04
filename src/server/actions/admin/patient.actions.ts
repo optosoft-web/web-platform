@@ -1,7 +1,7 @@
 "use server";
 
 import { z } from "zod";
-import { and, count, eq, ilike, or, sql } from "drizzle-orm";
+import { and, count, desc, eq, ilike, or, sql } from "drizzle-orm";
 import db from "@/server/database/index";
 import { patientTable, prescriptionTable, opticalShopTable, patientOpticalShops } from "@/server/database/tables";
 import { ActionError, authMiddleware, createAction } from "@/lib/safe-action";
@@ -11,11 +11,14 @@ const createPatientSchema = z.object({
     fullName: z.string().min(3, "O nome completo é obrigatório."),
     dateOfBirth: z.string().optional(),
     contactInfo: z.string().optional(),
+    phone: z.string().optional(),
+    cpf: z.string().optional(),
+    rg: z.string().optional(),
     opticalShopId: z.string(),
 });
 
 export const createPatient = createAction.inputSchema(createPatientSchema).use(authMiddleware).action(
-    async ({ parsedInput: { fullName, dateOfBirth, contactInfo, opticalShopId }, ctx }) => {
+    async ({ parsedInput: { fullName, dateOfBirth, contactInfo, phone, cpf, rg, opticalShopId }, ctx }) => {
         const { user } = ctx;
 
         try {
@@ -27,6 +30,9 @@ export const createPatient = createAction.inputSchema(createPatientSchema).use(a
                         fullName,
                         dateOfBirth,
                         contactInfo,
+                        phone: phone || null,
+                        cpf: cpf || null,
+                        rg: rg || null,
                     })
                     .returning();
 
@@ -156,7 +162,6 @@ export const getPatientDetails = createAction.inputSchema(getPatientDetailsSchem
                 ),
                 with: {
                     prescriptions: {
-                        // @ts-expect-error error
                         orderBy: (prescriptions, { desc }) => [desc(prescriptions.prescriptionDate)]
                     },
                     patientOpticalShops: {
@@ -357,3 +362,103 @@ export const deletePatient = createAction.inputSchema(deletePatientSchema).use(a
         }
     }
 );
+
+// ── Get all patients with optical shops and prescription count ──
+
+const getAllPatientsSchema = z.object({
+    limit: z.number().min(1).max(100).default(20),
+    offset: z.number().min(0).default(0),
+    search: z.string().optional(),
+});
+
+export const ActionGetAllPatients = createAction
+    .inputSchema(getAllPatientsSchema)
+    .use(authMiddleware)
+    .action(async ({ parsedInput, ctx }) => {
+        try {
+            const conditions = [eq(patientTable.userId, ctx.user.id)];
+
+            if (parsedInput.search && parsedInput.search.trim().length > 0) {
+                const q = `%${parsedInput.search.trim()}%`;
+                conditions.push(
+                    or(
+                        ilike(patientTable.fullName, q),
+                        ilike(patientTable.phone, q),
+                        ilike(patientTable.cpf, q),
+                    )!
+                );
+            }
+
+            const patients = await db
+                .select({
+                    id: patientTable.id,
+                    fullName: patientTable.fullName,
+                    phone: patientTable.phone,
+                    cpf: patientTable.cpf,
+                    dateOfBirth: patientTable.dateOfBirth,
+                    createdAt: patientTable.createdAt,
+                    prescriptionCount: sql<number>`(
+                        SELECT COUNT(*) FROM ${prescriptionTable}
+                        WHERE ${prescriptionTable.patientId} = ${patientTable.id}
+                    )`.mapWith(Number),
+                    lastPrescriptionDate: sql<string | null>`(
+                        SELECT MAX(${prescriptionTable.prescriptionDate})
+                        FROM ${prescriptionTable}
+                        WHERE ${prescriptionTable.patientId} = ${patientTable.id}
+                    )`,
+                })
+                .from(patientTable)
+                .where(and(...conditions))
+                .orderBy(desc(patientTable.createdAt))
+                .limit(parsedInput.limit)
+                .offset(parsedInput.offset);
+
+            const [{ total }] = await db
+                .select({ total: count() })
+                .from(patientTable)
+                .where(and(...conditions));
+
+            // Fetch optical shops for these patients
+            const patientIds = patients.map((p) => p.id);
+            let shopsMap: Record<string, { id: string; name: string }[]> = {};
+
+            if (patientIds.length > 0) {
+                const shops = await db
+                    .select({
+                        patientId: patientOpticalShops.patientId,
+                        shopId: opticalShopTable.id,
+                        shopName: opticalShopTable.name,
+                    })
+                    .from(patientOpticalShops)
+                    .innerJoin(
+                        opticalShopTable,
+                        eq(patientOpticalShops.opticalShopId, opticalShopTable.id)
+                    )
+                    .where(
+                        sql`${patientOpticalShops.patientId} IN (${sql.join(
+                            patientIds.map((id) => sql`${id}`),
+                            sql`, `
+                        )})`
+                    );
+
+                shopsMap = shops.reduce(
+                    (acc, row) => {
+                        if (!acc[row.patientId]) acc[row.patientId] = [];
+                        acc[row.patientId].push({ id: row.shopId, name: row.shopName });
+                        return acc;
+                    },
+                    {} as Record<string, { id: string; name: string }[]>
+                );
+            }
+
+            const data = patients.map((p) => ({
+                ...p,
+                opticalShops: shopsMap[p.id] || [],
+            }));
+
+            return { data, totalCount: total };
+        } catch (error) {
+            console.error("Erro ao buscar todos os pacientes:", error);
+            throw new Error("Não foi possível buscar os pacientes.");
+        }
+    });

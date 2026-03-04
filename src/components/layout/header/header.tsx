@@ -36,6 +36,8 @@ import {
     PopoverTrigger,
 } from '@/components/ui/popover';
 import { useRouter } from "next/navigation";
+import { useAction } from "next-safe-action/hooks";
+import { ActionGetProfile } from "@/server/actions/admin/profile.actions";
 
 type HeaderProps = {
     initialSession: Session | null;
@@ -75,9 +77,17 @@ export function Header(props: HeaderProps) {
     const isMobile = useIsMobile();
     const router = useRouter();
     const [session, setSession] = useState(props.initialSession);
+    const [displayName, setDisplayName] = useState<string | null>(null);
+
+    const getProfileAction = useAction(ActionGetProfile, {
+        onSuccess: ({ data }) => {
+            if (data?.fullName) {
+                setDisplayName(data.fullName);
+            }
+        },
+    });
 
     useEffect(() => {
-        console.log('render')
         const supabaseClient = createClient();
         const { data: authListener } = supabaseClient.auth.onAuthStateChange(
             (_event, session) => {
@@ -85,10 +95,27 @@ export function Header(props: HeaderProps) {
             }
         );
 
+        // Try to get display name from user_metadata immediately
+        supabaseClient.auth.getUser().then(({ data }) => {
+            const meta = data.user?.user_metadata;
+            if (meta?.full_name) setDisplayName(meta.full_name);
+        });
+
+        // Fetch profile for the most up-to-date fullName
+        getProfileAction.execute();
+
         return () => {
             authListener?.subscription.unsubscribe();
         };
     }, []);
+
+    const userName = displayName || session?.user.user_metadata?.full_name || session?.user.email?.split("@")[0] || "Usuário";
+    const initials = userName
+        .split(" ")
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((w: string) => w[0].toUpperCase())
+        .join("");
 
     return (
         <header className="w-full h-full border-b @container/main sticky">
@@ -121,12 +148,12 @@ export function Header(props: HeaderProps) {
                                 className="py-2"
                             >
                                 <Avatar className="h-8 w-8 rounded-lg">
-                                    <AvatarImage src={''} alt={''} />
-                                    <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                                    <AvatarImage src={''} alt={userName} />
+                                    <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
                                 </Avatar>
                                 {!isMobile && (
                                     <div className="grid flex-1 text-left text-sm leading-tight">
-                                        <span className="truncate font-medium">{'User'}</span>
+                                        <span className="truncate font-medium">{userName}</span>
                                         <span className="truncate text-xs">{session?.user.email}</span>
                                     </div>
                                 )}
@@ -142,31 +169,34 @@ export function Header(props: HeaderProps) {
                             <DropdownMenuLabel className="p-0 font-normal">
                                 <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                                     <Avatar className="h-8 w-8 rounded-lg">
-                                        {/* <AvatarImage src={'dd'} alt={'dd'} /> */}
-                                        <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                                        <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
                                     </Avatar>
                                     <div className="grid flex-1 text-left text-sm leading-tight">
-                                        <span className="truncate font-medium">{'Micael'}</span>
+                                        <span className="truncate font-medium">{userName}</span>
                                         <span className="truncate text-xs">{session?.user.email}</span>
                                     </div>
                                 </div>
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <DropdownMenuGroup>
-                                <DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => router.push("/billing")}>
                                     <Sparkles />
-                                    Upgrade to Pro
+                                    Gerenciar Assinatura
                                 </DropdownMenuItem>
                             </DropdownMenuGroup>
                             <DropdownMenuSeparator />
                             <DropdownMenuGroup>
-                                <DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => router.push("/admin/profile")}>
                                     <BadgeCheck />
                                     Minha conta
                                 </DropdownMenuItem>
                             </DropdownMenuGroup>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={async () => {
+                                const supabase = createClient();
+                                await supabase.auth.signOut();
+                                router.push("/");
+                            }}>
                                 <LogOut />
                                 Sair
                             </DropdownMenuItem>

@@ -2,29 +2,29 @@
 
 import { useState, useEffect } from "react";
 
-function getStorageValue<T>(key: string, defaultValue: T): T {
-  if (typeof window !== "undefined") {
+export function useLocalStorage<T>(key: string, defaultValue: T): [T, (value: T) => void] {
+  const [value, setValue] = useState<T>(defaultValue);
+  const [hasMounted, setHasMounted] = useState(false);
+
+  // Read from localStorage after hydration to avoid SSR mismatch
+  useEffect(() => {
     const saved = localStorage.getItem(key);
     if (saved) {
       try {
-        return JSON.parse(saved) as T;
+        setValue(JSON.parse(saved) as T);
       } catch (e) {
         console.error(e);
-        return defaultValue;
       }
     }
-  }
-  return defaultValue;
-}
+    setHasMounted(true);
+  }, [key]);
 
-export function useLocalStorage<T>(key: string, defaultValue: T): [T, (value: T) => void] {
-  const [value, setValue] = useState<T>(() => {
-    return getStorageValue(key, defaultValue);
-  });
-
+  // Persist to localStorage only after initial mount
   useEffect(() => {
-    localStorage.setItem(key, JSON.stringify(value));
-  }, [key, value]);
+    if (hasMounted) {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+  }, [key, value, hasMounted]);
 
   return [value, setValue];
 }

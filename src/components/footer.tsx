@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Eye } from "lucide-react"
+import { Eye, MessageCircle } from "lucide-react"
 
 export function Footer() {
   return (
@@ -34,9 +34,15 @@ export function Footer() {
             <Link href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Sobre
             </Link>
-            <Link href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              Contato
-            </Link>
+            <a
+              href="https://wa.me/5519983530073?text=Ol%C3%A1!%20Tenho%20interesse%20no%20Optosoft%20e%20gostaria%20de%20mais%20informa%C3%A7%C3%B5es."
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <MessageCircle className="h-3.5 w-3.5" />
+              Contato via WhatsApp
+            </a>
           </div>
 
           <div className="flex flex-col gap-3">

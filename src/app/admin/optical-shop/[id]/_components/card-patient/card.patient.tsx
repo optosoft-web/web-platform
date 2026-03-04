@@ -30,6 +30,7 @@ function Topic(props: iTopicProps) {
 
 interface iPatientCardProps {
     patient: iPatient;
+    onCreatePrescription?: (patient: { id: string; fullName: string }) => void;
 }
 
 function formartPatientBirthDate(dateOfBirth: string | null) {
@@ -54,7 +55,7 @@ function formartPatientBirthDate(dateOfBirth: string | null) {
     return birthDateDisplay
 }
 
-export function PatientCard({ patient }: iPatientCardProps) {
+export function PatientCard({ patient, onCreatePrescription }: iPatientCardProps) {
     const formattedCreatedAt = formatDate(patient.createdAt);
     const formattedBirthDate = formartPatientBirthDate(patient.dateOfBirth)
 
@@ -71,7 +72,7 @@ export function PatientCard({ patient }: iPatientCardProps) {
                                 <EllipsisVertical className="h-5 w-5" />
                             </DropdownMenuTrigger>
                             <DropdownMenuContent>
-                                <DropdownMenuItem>Criar Receita</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => onCreatePrescription?.({ id: patient.id, fullName: patient.fullName })}>Criar Receita</DropdownMenuItem>
                                 <DropdownMenuItem>Editar Paciente</DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem

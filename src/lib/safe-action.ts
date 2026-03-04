@@ -19,6 +19,7 @@ export const authMiddleware = createMiddleware().define(async ({ next }) => {
 export const createAction = createSafeActionClient({
 
     handleServerError: (error) => {
+        console.error("🔴 Server action error:", error);
         if (error instanceof ActionError) {
             return error.message;
         }

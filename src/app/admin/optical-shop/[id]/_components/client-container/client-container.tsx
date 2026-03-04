@@ -13,11 +13,21 @@ import { usePatients } from "@/hooks/use-patient";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { PatientCardList } from "../list-card-patient/list.card-patient";
 import { DialogCreatePatient } from "../dialog-create-patient/dialog.create-patient";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SheetCreatePrescription } from "../sheet-create-prescription/sheet.create-prescription";
+import { TablePrescriptions } from "../table-prescriptions/table.prescriptions";
 
 export function ClientContainerOpticalShop(props: iClientContainerOpticalShopProps) {
     const isMobile = useIsMobile();
     const [query, setQuery] = useState("");
     const debouncedQuery = useDebounce(query, 300);
+    const [sheetOpen, setSheetOpen] = useState(false);
+    const [preSelectedPatient, setPreSelectedPatient] = useState<{ id: string; fullName: string } | null>(null);
+
+    function handleCreatePrescription(patient?: { id: string; fullName: string }) {
+        setPreSelectedPatient(patient || null);
+        setSheetOpen(true);
+    }
 
     const [sorting, setSorting] = useState<SortingState>([]);
 
@@ -63,13 +73,13 @@ export function ClientContainerOpticalShop(props: iClientContainerOpticalShopPro
                 <div className="flex justify-between items-center">
                     <div className="text-xl uppercase font-bold truncate">{props.opticalShopData.name}</div>
                     <div className="flex gap-4">
-                        <Button>
+                        <Button onClick={() => handleCreatePrescription()}>
                             <Plus />
                             <span>
                                 <span className="hidden md:inline">Criar</span> Receita
                             </span>
                         </Button>
-                        <DialogCreatePatient>
+                        <DialogCreatePatient opticalShopId={props.opticalShopData.id}>
                             <Button variant={'outline'}>
                                 <Plus />
                                 <span>
@@ -83,47 +93,72 @@ export function ClientContainerOpticalShop(props: iClientContainerOpticalShopPro
                         </Button>
                     </div>
                 </div>
-                <div className="flex justify-between gap-4">
+            </div>
+
+            {/* Tabs: Pacientes + Receitas */}
+            <Tabs defaultValue="patients" className="w-full">
+                <div className="flex items-center justify-between gap-4 mb-4">
+                    <TabsList>
+                        <TabsTrigger value="patients">Pacientes</TabsTrigger>
+                        <TabsTrigger value="prescriptions">Receitas</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="patients" className="mt-0 flex-1">
+                        <Input
+                            value={query}
+                            onChange={(event) => setQuery(event.target.value)}
+                            className="w-full md:max-w-md ml-auto"
+                            type="search"
+                            placeholder="Busque pelo paciente..."
+                        />
+                    </TabsContent>
+                </div>
+
+                <TabsContent value="patients">
                     <div className="w-full">
-                        <Input value={query} onChange={(event) => setQuery(event.target.value)} className="w-full md:max-w-md" type="search" placeholder="Busque pelo paciente..." />
-                    </div>
-                    <div>
+                        {isMobile ? (
+                            <PatientCardList patients={patients} isLoading={isLoading} onCreatePrescription={handleCreatePrescription} />
+                        ) : (
+                            <TablePatient table={table} isLoading={isLoading} />
+                        )}
 
-                        {/* <ToggleGroup defaultValue="card" variant="outline" type="single">
-                            <ToggleGroupItem value="card" aria-label="Toggle card view">
-                                <Grid2x2 className="h-4 w-4" />
-                            </ToggleGroupItem>
-                            <ToggleGroupItem value="table" aria-label="Toggle table view">
-                                <List className="h-4 w-4" />
-                            </ToggleGroupItem>
-                        </ToggleGroup> */}
+                        <div className="flex items-center justify-between mt-4">
+                            <span className="text-sm text-muted-foreground">
+                                Página {table.getState().pagination.pageIndex + 1} de{" "}
+                                {table.getPageCount()}
+                            </span>
+                            <div className="space-x-2">
+                                <Button
+                                    onClick={() => table.previousPage()}
+                                    disabled={!table.getCanPreviousPage()}
+                                >
+                                    Anterior
+                                </Button>
+                                <Button
+                                    onClick={() => table.nextPage()}
+                                    disabled={!table.getCanNextPage()}
+                                >
+                                    Próxima
+                                </Button>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-            {/* content */}
-            <div className="w-full">
-                {isMobile ? <PatientCardList patients={patients} isLoading={isLoading} /> : <TablePatient table={table} isLoading={isLoading} />}
+                </TabsContent>
 
-                <div className="flex items-center justify-between mt-4">
-                    <span className="text-sm text-muted-foreground">
-                        Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
-                    </span>
-                    <div className="space-x-2">
-                        <Button
-                            onClick={() => table.previousPage()}
-                            disabled={!table.getCanPreviousPage()}
-                        >
-                            Anterior
-                        </Button>
-                        <Button
-                            onClick={() => table.nextPage()}
-                            disabled={!table.getCanNextPage()}
-                        >
-                            Próxima
-                        </Button>
-                    </div>
-                </div>
-            </div>
+                <TabsContent value="prescriptions">
+                    <TablePrescriptions opticalShopId={props.opticalShopData.id} />
+                </TabsContent>
+            </Tabs>
+
+            {/* Sheet for creating prescriptions */}
+            <SheetCreatePrescription
+                open={sheetOpen}
+                onOpenChange={(open) => {
+                    setSheetOpen(open);
+                    if (!open) setPreSelectedPatient(null);
+                }}
+                opticalShopId={props.opticalShopData.id}
+                preSelectedPatient={preSelectedPatient}
+            />
         </>
-    )
+    );
 }

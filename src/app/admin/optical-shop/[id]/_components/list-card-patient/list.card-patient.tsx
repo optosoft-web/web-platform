@@ -6,9 +6,10 @@ import { iPatient } from "../table-patient/table.patient-columns";
 interface iPatientCardListProps {
     patients: iPatient[];
     isLoading?: boolean;
+    onCreatePrescription?: (patient: { id: string; fullName: string }) => void;
 }
 
-export function PatientCardList({ patients, isLoading }: iPatientCardListProps) {
+export function PatientCardList({ patients, isLoading, onCreatePrescription }: iPatientCardListProps) {
 
     if (isLoading) {
         return (
@@ -33,7 +34,7 @@ export function PatientCardList({ patients, isLoading }: iPatientCardListProps) 
         // Grid responsiva para os cards
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {patients.map((patient) => (
-                <PatientCard key={patient.id} patient={patient} />
+                <PatientCard key={patient.id} patient={patient} onCreatePrescription={onCreatePrescription} />
             ))}
         </div>
     );

@@ -17,6 +17,7 @@ export const subscriptionTable = pgTable("subscriptions", {
     userId: uuid("user_id")
         .notNull()
         .references(() => authUsers.id, { onDelete: "cascade" }),
+    stripeCustomerId: text("stripe_customer_id"), // Stripe's Customer ID (e.g., "cus_...")
     status: subscriptionStatusEnum("status"),
     priceId: text("price_id"), // Stripe's Price ID (e.g., "price_...")
     quantity: integer("quantity"),

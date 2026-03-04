@@ -11,6 +11,9 @@ export const patientTable = pgTable("patients", {
         .references(() => authUsers.id, { onDelete: "cascade" }),
     fullName: varchar("full_name").notNull(),
     dateOfBirth: date("date_of_birth"),
+    phone: varchar("phone", { length: 20 }),
+    cpf: varchar("cpf", { length: 14 }),
+    rg: varchar("rg", { length: 20 }),
     contactInfo: text("contact_info"),
     createdAt: timestamp("created_at", { withTimezone: true })
         .notNull()

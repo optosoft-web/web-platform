@@ -7,6 +7,31 @@ export function CardSkeletonOpticalShop() {
     );
 }
 
+export function TableSkeletonOpticalShops() {
+    return (
+        <div className="rounded-md border">
+            <div className="p-3 border-b">
+                <div className="grid grid-cols-5 gap-4">
+                    {["w-24", "w-32", "w-20", "w-24", "w-16"].map((w, i) => (
+                        <Skeleton key={i} className={`h-4 ${w}`} />
+                    ))}
+                </div>
+            </div>
+            {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="p-3 border-b last:border-0">
+                    <div className="grid grid-cols-5 gap-4 items-center">
+                        <Skeleton className="h-4 w-32" />
+                        <Skeleton className="h-4 w-40" />
+                        <Skeleton className="h-4 w-10" />
+                        <Skeleton className="h-4 w-24" />
+                        <Skeleton className="h-8 w-8 ml-auto" />
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+}
+
 export function OpticalShopsPageSkeleton() {
     return (
         <>

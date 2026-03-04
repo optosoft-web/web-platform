@@ -14,7 +14,10 @@ import { DialogCreateOpticalShop } from "../dialog-create-optical-shop/dialog.cr
 import { OpticalShopCard } from "../card-optical-shop/card-optical-shop";
 import { iOpticalShopCardProps } from "../card-optical-shop/card-optical-shop.types";
 import { ActionGetOpticalShopsForCards } from "@/server/actions/admin/optical-shop.actions";
-import { CardSkeletonOpticalShop } from "../skeletons/optical-shops-skeleton";
+import { CardSkeletonOpticalShop, TableSkeletonOpticalShops } from "../skeletons/optical-shops-skeleton";
+import { TableOpticalShops } from "../table-optical-shops/table-optical-shops";
+import { useLocalStorage } from "@/hooks/use-local-storage";
+import { useState } from "react";
 
 const fetchOpticalShops = async (): Promise<iOpticalShopCardProps[]> => {
     const result = await ActionGetOpticalShopsForCards();
@@ -30,12 +33,23 @@ const fetchOpticalShops = async (): Promise<iOpticalShopCardProps[]> => {
     return result.data;
 };
 
+type ViewMode = "card" | "table";
+
 export function ClientContainerOpticalShops(props: iClientContainerOpticalShopsProps) {
+    const [viewMode, setViewMode] = useLocalStorage<ViewMode>("optical-shops-view", "card");
+    const [search, setSearch] = useState("");
+
     const query = useQuery({
         initialData: props.initialOpticalShops,
         queryKey: ['opticalShopsDataForCards'],
         queryFn: fetchOpticalShops
     });
+
+    const filteredData = (query.data ?? []).filter((item) =>
+        item.name.toLowerCase().includes(search.toLowerCase())
+    );
+
+    const isLoading = query.isRefetching || query.isLoading;
 
     return (
         <>
@@ -49,33 +63,53 @@ export function ClientContainerOpticalShops(props: iClientContainerOpticalShopsP
                 </div>
                 <div className="flex justify-between gap-4">
                     <div className="w-full">
-                        <Input className="w-full md:max-w-md" type="search" placeholder="Busque pela ótica..." />
+                        <Input
+                            className="w-full md:max-w-md"
+                            type="search"
+                            placeholder="Busque pela ótica..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                        />
                     </div>
                     <div>
-                        <ToggleGroup defaultValue="card" variant="outline" type="single">
-                            <ToggleGroupItem value="card" aria-label="Toggle card view">
+                        <ToggleGroup
+                            value={viewMode}
+                            onValueChange={(v) => v && setViewMode(v as ViewMode)}
+                            variant="outline"
+                            type="single"
+                        >
+                            <ToggleGroupItem value="card" aria-label="Visualização em cards">
                                 <Grid2x2 className="h-4 w-4" />
                             </ToggleGroupItem>
-                            <ToggleGroupItem value="table" aria-label="Toggle table view">
+                            <ToggleGroupItem value="table" aria-label="Visualização em tabela">
                                 <List className="h-4 w-4" />
                             </ToggleGroupItem>
                         </ToggleGroup>
                     </div>
                 </div>
             </div>
-            {/* cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {(query.isRefetching || query.isLoading) ? (
-                    Array.from({ length: query.data?.length ?? 3 }).map((_, i) => (
-                        <CardSkeletonOpticalShop key={`card-optical-shop-skeleton-${i}`} />
-                    ))
-                ) : query.data?.map((item, i) => (
-                    <OpticalShopCard
-                        key={`optical-shop-card-${item.id}-${i}`}
-                        {...item}
-                    />
-                ))}
-            </div>
+
+            {/* content */}
+            {viewMode === "card" ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {isLoading ? (
+                        Array.from({ length: query.data?.length ?? 3 }).map((_, i) => (
+                            <CardSkeletonOpticalShop key={`card-optical-shop-skeleton-${i}`} />
+                        ))
+                    ) : filteredData.map((item, i) => (
+                        <OpticalShopCard
+                            key={`optical-shop-card-${item.id}-${i}`}
+                            {...item}
+                        />
+                    ))}
+                </div>
+            ) : (
+                isLoading ? (
+                    <TableSkeletonOpticalShops />
+                ) : (
+                    <TableOpticalShops data={filteredData} />
+                )
+            )}
         </>
     )
 }

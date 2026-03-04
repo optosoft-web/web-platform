@@ -27,7 +27,12 @@ export const ActionSignUpUser = createAction
 
             const { data, error: errorSignUp } = await supabase.auth.signUp({
                 email,
-                password
+                password,
+                options: {
+                    data: {
+                        full_name: fullName,
+                    },
+                },
             })
 
             if (errorSignUp) {
