@@ -20,7 +20,7 @@ export function SubscribeButton({ priceId, isFeatured = false }: SubscribeButton
   const { execute, status } = useAction(createCheckoutSession, {
     onSuccess: (data) => {
       if (data?.data?.url) {
-        router.push(data.data.url);
+        window.location.href = data.data.url;
       }
     },
     onError: (error) => {

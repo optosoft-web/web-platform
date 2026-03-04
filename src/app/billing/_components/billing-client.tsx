@@ -8,8 +8,9 @@ import {
 } from "@/server/actions/stripe.action";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, CreditCard, RefreshCw, Check, Loader2 } from "lucide-react";
+import { AlertCircle, CreditCard, RefreshCw, Check, Loader2, Clock } from "lucide-react";
 import Stripe from "stripe";
+import { Badge } from "@/components/ui/badge";
 
 type SubscriptionData = {
     id: string;
@@ -79,7 +80,7 @@ export function BillingClient({ reason, subscription, plans }: BillingClientProp
         {
             onSuccess: (data) => {
                 if (data?.data?.url) {
-                    router.push(data.data.url);
+                    window.location.href = data.data.url;
                 }
             },
             onError: (error) => {
@@ -93,7 +94,7 @@ export function BillingClient({ reason, subscription, plans }: BillingClientProp
         {
             onSuccess: (data) => {
                 if (data?.data?.url) {
-                    router.push(data.data.url);
+                    window.location.href = data.data.url;
                 }
             },
             onError: (error) => {
@@ -206,10 +207,35 @@ export function BillingClient({ reason, subscription, plans }: BillingClientProp
                                 ((a.default_price as Stripe.Price)?.unit_amount ?? 0) -
                                 ((b.default_price as Stripe.Price)?.unit_amount ?? 0),
                         )
-                        .map((plan) => {
+                        .map((plan, index) => {
                             const price = plan.default_price as Stripe.Price;
+                            const isBasic = index === 0;
+                            const isAvailable = isBasic;
+
                             return (
-                                <Card key={plan.id} className="flex flex-col shadow-lg hover:shadow-xl transition-shadow">
+                                <Card
+                                    key={plan.id}
+                                    className={`relative flex flex-col transition-all duration-300 hover:shadow-xl ${
+                                        isBasic
+                                            ? "border-primary border-2 shadow-lg scale-[1.02]"
+                                            : "opacity-80"
+                                    }`}
+                                >
+                                    {isBasic && (
+                                        <div className="absolute top-0 right-4 -mt-3">
+                                            <Badge className="bg-primary text-primary-foreground shadow-md">
+                                                Disponível
+                                            </Badge>
+                                        </div>
+                                    )}
+                                    {!isAvailable && (
+                                        <div className="absolute top-0 right-4 -mt-3">
+                                            <Badge variant="secondary" className="shadow-md">
+                                                <Clock className="h-3 w-3 mr-1" />
+                                                Em breve
+                                            </Badge>
+                                        </div>
+                                    )}
                                     <CardHeader className="text-center">
                                         <CardTitle className="text-xl font-bold">{plan.name}</CardTitle>
                                         <CardDescription>{plan.description}</CardDescription>
@@ -219,8 +245,10 @@ export function BillingClient({ reason, subscription, plans }: BillingClientProp
                                             <span className="text-4xl font-extrabold">
                                                 R${" "}
                                                 {price.unit_amount
-                                                    ? (price.unit_amount / 100).toFixed(2)
-                                                    : "0.00"}
+                                                    ? (price.unit_amount / 100)
+                                                          .toFixed(2)
+                                                          .replace(".", ",")
+                                                    : "0,00"}
                                             </span>
                                             <span className="text-lg text-muted-foreground">
                                                 / {price.recurring?.interval === "month" ? "mês" : "ano"}
@@ -229,8 +257,20 @@ export function BillingClient({ reason, subscription, plans }: BillingClientProp
                                         <ul className="space-y-3">
                                             {plan.marketing_features.map((feature, idx) => (
                                                 <li key={idx} className="flex items-start gap-2">
-                                                    <Check className="h-4 w-4 text-green-500 shrink-0 mt-1" />
-                                                    <span className="text-sm text-muted-foreground">
+                                                    <Check
+                                                        className={`h-4 w-4 shrink-0 mt-1 ${
+                                                            isAvailable
+                                                                ? "text-emerald-500"
+                                                                : "text-muted-foreground/50"
+                                                        }`}
+                                                    />
+                                                    <span
+                                                        className={`text-sm ${
+                                                            isAvailable
+                                                                ? "text-muted-foreground"
+                                                                : "text-muted-foreground/50"
+                                                        }`}
+                                                    >
                                                         {feature.name}
                                                     </span>
                                                 </li>
@@ -238,21 +278,30 @@ export function BillingClient({ reason, subscription, plans }: BillingClientProp
                                         </ul>
                                     </CardContent>
                                     <CardFooter>
-                                        <Button
-                                            className="w-full"
-                                            size="lg"
-                                            disabled={isCheckoutLoading}
-                                            onClick={() => executeCheckout({ priceId: price.id })}
-                                        >
-                                            {isCheckoutLoading ? (
-                                                <>
-                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                    Aguarde...
-                                                </>
-                                            ) : (
-                                                "Assinar"
-                                            )}
-                                        </Button>
+                                        {isAvailable ? (
+                                            <Button
+                                                className="w-full"
+                                                size="lg"
+                                                disabled={isCheckoutLoading}
+                                                onClick={() => executeCheckout({ priceId: price.id })}
+                                            >
+                                                {isCheckoutLoading ? (
+                                                    <>
+                                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                        Aguarde...
+                                                    </>
+                                                ) : (
+                                                    "Assinar"
+                                                )}
+                                            </Button>
+                                        ) : (
+                                            <button
+                                                disabled
+                                                className="w-full py-3 px-6 text-lg font-semibold rounded-lg bg-muted text-muted-foreground cursor-not-allowed"
+                                            >
+                                                Em breve
+                                            </button>
+                                        )}
                                     </CardFooter>
                                 </Card>
                             );
