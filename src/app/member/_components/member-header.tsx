@@ -47,11 +47,11 @@ export function MemberHeader({ ownerName, memberName, memberEmail }: MemberHeade
         .toUpperCase();
 
     return (
-        <header className="w-full h-full border-b sticky">
+        <header className="w-full h-full border-b sticky top-0 z-40 bg-background">
             <div
                 className={cn(
-                    "grid grid-cols-2 items-center container mx-auto h-full px-4",
-                    !isMobile && "grid-cols-3",
+                    "flex items-center justify-between container mx-auto h-full px-4",
+                    !isMobile && "grid grid-cols-3",
                 )}
             >
                 <div className="flex items-center gap-4">
@@ -85,10 +85,10 @@ export function MemberHeader({ ownerName, memberName, memberEmail }: MemberHeade
                     </div>
                 )}
 
-                <div className="justify-self-end flex gap-2 items-center">
+                <div className="justify-self-end flex gap-1 items-center shrink-0">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button size="lg" variant="ghost" className="py-2">
+                            <Button size={isMobile ? "icon" : "lg"} variant="ghost" className={cn("py-2", isMobile && "h-9 w-9 p-0")}>
                                 <Avatar className="h-8 w-8 rounded-lg">
                                     <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
                                 </Avatar>
@@ -98,7 +98,7 @@ export function MemberHeader({ ownerName, memberName, memberEmail }: MemberHeade
                                         <span className="truncate text-xs">{memberEmail}</span>
                                     </div>
                                 )}
-                                <ChevronsUpDown className="ml-auto size-4" />
+                                {!isMobile && <ChevronsUpDown className="ml-auto size-4" />}
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent

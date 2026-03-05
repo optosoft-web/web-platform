@@ -281,13 +281,19 @@ export function SheetCreatePrescription({
                 patientId: selectedPatient.id,
             });
         } else if (isNewPatient && patientQuery.trim().length >= 3) {
+            // Convert DD/MM/YYYY to YYYY-MM-DD for the database
+            let dobForDb: string | undefined;
+            if (newPatientDob && newPatientDob.length === 10) {
+                const [dd, mm, yyyy] = newPatientDob.split("/");
+                dobForDb = `${yyyy}-${mm}-${dd}`;
+            }
             createWithNewPatientAction.execute({
                 ...prescriptionData,
                 patientFullName: patientQuery.trim(),
                 patientPhone: newPatientPhone || undefined,
                 patientCpf: newPatientCpf || undefined,
                 patientRg: newPatientRg || undefined,
-                patientDateOfBirth: newPatientDob || undefined,
+                patientDateOfBirth: dobForDb,
             });
         } else {
             toast.error("Selecione ou cadastre um paciente.");
@@ -428,9 +434,21 @@ export function SheetCreatePrescription({
                                     <Label htmlFor="new-dob">Data de Nascimento</Label>
                                     <Input
                                         id="new-dob"
-                                        type="date"
+                                        inputMode="numeric"
                                         value={newPatientDob}
-                                        onChange={(e) => setNewPatientDob(e.target.value)}
+                                        onChange={(e) => {
+                                            // Auto-format as DD/MM/YYYY
+                                            let v = e.target.value.replace(/\D/g, "");
+                                            if (v.length > 8) v = v.slice(0, 8);
+                                            if (v.length > 4) {
+                                                v = v.slice(0, 2) + "/" + v.slice(2, 4) + "/" + v.slice(4);
+                                            } else if (v.length > 2) {
+                                                v = v.slice(0, 2) + "/" + v.slice(2);
+                                            }
+                                            setNewPatientDob(v);
+                                        }}
+                                        placeholder="DD/MM/AAAA"
+                                        maxLength={10}
                                     />
                                 </div>
                             </div>
@@ -450,7 +468,7 @@ export function SheetCreatePrescription({
                                     <Label className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
                                         Olho Direito (OD)
                                     </Label>
-                                    <div className="grid grid-cols-3 gap-3">
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
                                         <div className="space-y-1.5">
                                             <Label htmlFor="od-sph" className="text-xs">
                                                 Esférico
@@ -477,7 +495,7 @@ export function SheetCreatePrescription({
                                                 searchPlaceholder="Ex: -1.00"
                                             />
                                         </div>
-                                        <div className="space-y-1.5">
+                                        <div className="space-y-1.5 col-span-2 sm:col-span-1">
                                             <Label htmlFor="od-axis" className="text-xs">
                                                 Eixo
                                             </Label>
@@ -499,7 +517,7 @@ export function SheetCreatePrescription({
                                     <Label className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
                                         Olho Esquerdo (OE)
                                     </Label>
-                                    <div className="grid grid-cols-3 gap-3">
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
                                         <div className="space-y-1.5">
                                             <Label htmlFor="oe-sph" className="text-xs">
                                                 Esférico
@@ -526,7 +544,7 @@ export function SheetCreatePrescription({
                                                 searchPlaceholder="Ex: -1.00"
                                             />
                                         </div>
-                                        <div className="space-y-1.5">
+                                        <div className="space-y-1.5 col-span-2 sm:col-span-1">
                                             <Label htmlFor="oe-axis" className="text-xs">
                                                 Eixo
                                             </Label>
@@ -544,8 +562,8 @@ export function SheetCreatePrescription({
                                 </div>
 
                                 {/* Addition + DNP */}
-                                <div className="grid grid-cols-3 gap-3">
-                                    <div className="space-y-1.5">
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
+                                    <div className="space-y-1.5 col-span-2 sm:col-span-1">
                                         <Label htmlFor="addition" className="text-xs">
                                             Adição
                                         </Label>
@@ -594,7 +612,7 @@ export function SheetCreatePrescription({
                                         <Label className="text-base font-semibold">Perto (Calculado)</Label>
                                         <div className="rounded-md border p-4 bg-muted/30 space-y-3">
                                             {odSpherical && (
-                                                <div className="flex items-center gap-4">
+                                                <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
                                                     <span className="text-sm font-medium w-8">OD:</span>
                                                     <span className="text-sm">
                                                         Esférico: <strong>{odNearSpherical}</strong>
@@ -612,7 +630,7 @@ export function SheetCreatePrescription({
                                                 </div>
                                             )}
                                             {oeSpherical && (
-                                                <div className="flex items-center gap-4">
+                                                <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
                                                     <span className="text-sm font-medium w-8">OE:</span>
                                                     <span className="text-sm">
                                                         Esférico: <strong>{oeNearSpherical}</strong>

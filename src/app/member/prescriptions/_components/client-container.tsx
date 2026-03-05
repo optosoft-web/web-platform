@@ -191,7 +191,7 @@ export function MemberPrescriptionsClient() {
             </head>
             <body>
                 <div class="header">
-                    <h1>Receita Oftalmológica</h1>
+                    <h1>Prescrição de lentes</h1>
                 </div>
                 <div class="patient-info">
                     <h2>${data.patientName}</h2>

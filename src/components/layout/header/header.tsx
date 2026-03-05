@@ -118,10 +118,10 @@ export function Header(props: HeaderProps) {
         .join("");
 
     return (
-        <header className="w-full h-full border-b @container/main sticky">
+        <header className="w-full h-full border-b @container/main sticky top-0 z-40 bg-background">
             <div className={cn(
-                "grid grid-cols-2 items-center container mx-auto h-full px-4",
-                !isMobile && 'grid-cols-3'
+                "flex items-center justify-between container mx-auto h-full px-4",
+                !isMobile && 'grid grid-cols-3'
             )}>
                 <div><AppLogo /></div>
                 {!isMobile && (
@@ -139,13 +139,13 @@ export function Header(props: HeaderProps) {
                         </NavigationMenu>
                     </div>
                 )}
-                <div className="justify-self-end flex gap-2 items-center">
+                <div className="justify-self-end flex gap-1 items-center shrink-0">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button
-                                size="lg"
+                                size={isMobile ? "icon" : "lg"}
                                 variant={'ghost'}
-                                className="py-2"
+                                className={cn("py-2", isMobile && "h-9 w-9 p-0")}
                             >
                                 <Avatar className="h-8 w-8 rounded-lg">
                                     <AvatarImage src={''} alt={userName} />
@@ -157,7 +157,7 @@ export function Header(props: HeaderProps) {
                                         <span className="truncate text-xs">{session?.user.email}</span>
                                     </div>
                                 )}
-                                <ChevronsUpDown className="ml-auto size-4" />
+                                {!isMobile && <ChevronsUpDown className="ml-auto size-4" />}
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent

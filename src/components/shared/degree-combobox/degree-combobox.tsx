@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useRef, useCallback } from "react";
+import { useState, useMemo, useCallback } from "react";
 import {
     Popover,
     PopoverContent,
@@ -17,6 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface DegreeComboboxProps {
     options: string[];
@@ -42,6 +43,7 @@ export function DegreeCombobox({
     id,
     className,
 }: DegreeComboboxProps) {
+    const isMobile = useIsMobile();
     const [open, setOpen] = useState(false);
     const [search, setSearch] = useState("");
 
@@ -63,6 +65,39 @@ export function DegreeCombobox({
     const displayValue = value
         ? `${value}${suffix}`
         : placeholder;
+
+    // On mobile, sort options descending so positive values are above 0 and negatives below
+    const mobileOptions = useMemo(() => {
+        return [...options].sort((a, b) => {
+            const numA = parseFloat(a.replace(",", "."));
+            const numB = parseFloat(b.replace(",", "."));
+            if (isNaN(numA) || isNaN(numB)) return 0;
+            return numB - numA; // descending: +20 ... +0.25, 0, -0.25 ... -20
+        });
+    }, [options]);
+
+    // On mobile, render a native <select> for better scroll UX
+    if (isMobile) {
+        return (
+            <select
+                id={id}
+                value={value}
+                onChange={(e) => onValueChange(e.target.value)}
+                className={cn(
+                    "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                    !value && "text-muted-foreground",
+                    className
+                )}
+            >
+                <option value="">{placeholder}</option>
+                {mobileOptions.map((opt) => (
+                    <option key={opt} value={opt}>
+                        {opt}{suffix}
+                    </option>
+                ))}
+            </select>
+        );
+    }
 
     return (
         <Popover open={open} onOpenChange={setOpen}>

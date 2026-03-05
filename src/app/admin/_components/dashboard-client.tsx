@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
     Card,
     CardContent,
@@ -21,6 +22,14 @@ import {
     ChartTooltip,
     ChartTooltipContent,
 } from "@/components/ui/chart";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { SheetCreatePrescription } from "@/app/admin/optical-shop/[id]/_components/sheet-create-prescription/sheet.create-prescription";
 import { Bar, BarChart, XAxis, YAxis } from "recharts";
 import {
     Store,
@@ -30,6 +39,7 @@ import {
     TrendingUp,
     TrendingDown,
     ArrowRight,
+    Plus,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -69,8 +79,14 @@ type DashboardData = {
     }[];
 };
 
+interface Shop {
+    id: string;
+    name: string;
+}
+
 type Props = {
     data: DashboardData | null;
+    shops: Shop[];
 };
 
 const monthNames: Record<string, string> = {
@@ -121,7 +137,15 @@ const chartConfig = {
     },
 } satisfies ChartConfig;
 
-export function DashboardClient({ data }: Props) {
+export function DashboardClient({ data, shops }: Props) {
+    const [sheetOpen, setSheetOpen] = useState(false);
+    const [selectedShopId, setSelectedShopId] = useState<string | null>(null);
+
+    function handleCreateForShop(shopId: string) {
+        setSelectedShopId(shopId);
+        setSheetOpen(true);
+    }
+
     if (!data) {
         return (
             <div className="flex items-center justify-center h-[60vh]">
@@ -140,12 +164,40 @@ export function DashboardClient({ data }: Props) {
 
     return (
         <div className="flex flex-col gap-6 py-6">
-            {/* Page title */}
-            <div>
-                <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-                <p className="text-muted-foreground text-sm">
-                    Visão geral da sua conta
-                </p>
+            {/* Page title + Create button */}
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+                    <p className="text-muted-foreground text-sm">
+                        Visão geral da sua conta
+                    </p>
+                </div>
+                {shops.length === 1 ? (
+                    <Button onClick={() => handleCreateForShop(shops[0].id)}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Criar Receita
+                    </Button>
+                ) : shops.length > 1 ? (
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button>
+                                <Plus className="h-4 w-4 mr-2" />
+                                Criar Receita
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            {shops.map((shop) => (
+                                <DropdownMenuItem
+                                    key={shop.id}
+                                    onClick={() => handleCreateForShop(shop.id)}
+                                >
+                                    <Store className="h-4 w-4 mr-2" />
+                                    {shop.name}
+                                </DropdownMenuItem>
+                            ))}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                ) : null}
             </div>
 
             {/* KPI Cards */}
@@ -360,6 +412,15 @@ export function DashboardClient({ data }: Props) {
                     )}
                 </CardContent>
             </Card>
+
+            {/* Sheet for creating prescription */}
+            {selectedShopId && (
+                <SheetCreatePrescription
+                    open={sheetOpen}
+                    onOpenChange={setSheetOpen}
+                    opticalShopId={selectedShopId}
+                />
+            )}
         </div>
     );
 }
