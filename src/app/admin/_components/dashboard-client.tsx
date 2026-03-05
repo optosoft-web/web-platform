@@ -202,98 +202,110 @@ export function DashboardClient({ data, shops }: Props) {
 
             {/* KPI Cards */}
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardDescription className="text-sm font-medium">Óticas</CardDescription>
-                        <Store className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{data.totals.opticalShops}</div>
-                        <p className="text-xs text-muted-foreground">cadastradas</p>
-                    </CardContent>
-                </Card>
+                <Link href="/admin/optical-shops">
+                    <Card className="transition-colors hover:border-primary/40 cursor-pointer h-full">
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
+                            <CardDescription className="text-sm font-medium">Óticas</CardDescription>
+                            <Store className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{data.totals.opticalShops}</div>
+                            <p className="text-xs text-muted-foreground">cadastradas</p>
+                        </CardContent>
+                    </Card>
+                </Link>
 
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardDescription className="text-sm font-medium">Pacientes</CardDescription>
-                        <Users className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{data.totals.patients}</div>
-                        <div className="flex items-center gap-1 text-xs">
-                            {patientChange.positive ? (
-                                <TrendingUp className="h-3 w-3 text-emerald-500" />
-                            ) : (
-                                <TrendingDown className="h-3 w-3 text-red-500" />
-                            )}
-                            <span className={patientChange.positive ? "text-emerald-500" : "text-red-500"}>
-                                {patientChange.pct}%
-                            </span>
-                            <span className="text-muted-foreground">vs. mês anterior</span>
-                        </div>
-                    </CardContent>
-                </Card>
+                <Link href="/admin/patients">
+                    <Card className="transition-colors hover:border-primary/40 cursor-pointer h-full">
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
+                            <CardDescription className="text-sm font-medium">Pacientes</CardDescription>
+                            <Users className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{data.totals.patients}</div>
+                            <div className="flex items-center gap-1 text-xs">
+                                {patientChange.positive ? (
+                                    <TrendingUp className="h-3 w-3 text-emerald-500" />
+                                ) : (
+                                    <TrendingDown className="h-3 w-3 text-red-500" />
+                                )}
+                                <span className={patientChange.positive ? "text-emerald-500" : "text-red-500"}>
+                                    {patientChange.pct}%
+                                </span>
+                                <span className="text-muted-foreground">vs. mês anterior</span>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </Link>
 
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardDescription className="text-sm font-medium">Receitas</CardDescription>
-                        <FileText className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{data.totals.prescriptions}</div>
-                        <div className="flex items-center gap-1 text-xs">
-                            {rxChange.positive ? (
-                                <TrendingUp className="h-3 w-3 text-emerald-500" />
-                            ) : (
-                                <TrendingDown className="h-3 w-3 text-red-500" />
-                            )}
-                            <span className={rxChange.positive ? "text-emerald-500" : "text-red-500"}>
-                                {rxChange.pct}%
-                            </span>
-                            <span className="text-muted-foreground">vs. mês anterior</span>
-                        </div>
-                    </CardContent>
-                </Card>
+                <Link href="/admin/prescriptions">
+                    <Card className="transition-colors hover:border-primary/40 cursor-pointer h-full">
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
+                            <CardDescription className="text-sm font-medium">Receitas</CardDescription>
+                            <FileText className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{data.totals.prescriptions}</div>
+                            <div className="flex items-center gap-1 text-xs">
+                                {rxChange.positive ? (
+                                    <TrendingUp className="h-3 w-3 text-emerald-500" />
+                                ) : (
+                                    <TrendingDown className="h-3 w-3 text-red-500" />
+                                )}
+                                <span className={rxChange.positive ? "text-emerald-500" : "text-red-500"}>
+                                    {rxChange.pct}%
+                                </span>
+                                <span className="text-muted-foreground">vs. mês anterior</span>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </Link>
 
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardDescription className="text-sm font-medium">Membros</CardDescription>
-                        <UserPlus className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{data.totals.teamMembers}</div>
-                        <p className="text-xs text-muted-foreground">na equipe</p>
-                    </CardContent>
-                </Card>
+                <Link href="/admin/team-members">
+                    <Card className="transition-colors hover:border-primary/40 cursor-pointer h-full">
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
+                            <CardDescription className="text-sm font-medium">Membros</CardDescription>
+                            <UserPlus className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{data.totals.teamMembers}</div>
+                            <p className="text-xs text-muted-foreground">na equipe</p>
+                        </CardContent>
+                    </Card>
+                </Link>
             </div>
 
             {/* Monthly summary row */}
             <div className="grid gap-4 sm:grid-cols-2">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Pacientes este mês</CardTitle>
-                        <CardDescription>Novos pacientes cadastrados no mês atual</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-3xl font-bold">{data.thisMonth.patients}</div>
-                        <p className="text-sm text-muted-foreground mt-1">
-                            {data.lastMonth.patients} no mês anterior
-                        </p>
-                    </CardContent>
-                </Card>
+                <Link href="/admin/patients">
+                    <Card className="transition-colors hover:border-primary/40 cursor-pointer h-full">
+                        <CardHeader>
+                            <CardTitle>Pacientes este mês</CardTitle>
+                            <CardDescription>Novos pacientes cadastrados no mês atual</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-3xl font-bold">{data.thisMonth.patients}</div>
+                            <p className="text-sm text-muted-foreground mt-1">
+                                {data.lastMonth.patients} no mês anterior
+                            </p>
+                        </CardContent>
+                    </Card>
+                </Link>
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Receitas este mês</CardTitle>
-                        <CardDescription>Receitas emitidas no mês atual</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-3xl font-bold">{data.thisMonth.prescriptions}</div>
-                        <p className="text-sm text-muted-foreground mt-1">
-                            {data.lastMonth.prescriptions} no mês anterior
-                        </p>
-                    </CardContent>
-                </Card>
+                <Link href="/admin/prescriptions">
+                    <Card className="transition-colors hover:border-primary/40 cursor-pointer h-full">
+                        <CardHeader>
+                            <CardTitle>Receitas este mês</CardTitle>
+                            <CardDescription>Receitas emitidas no mês atual</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-3xl font-bold">{data.thisMonth.prescriptions}</div>
+                            <p className="text-sm text-muted-foreground mt-1">
+                                {data.lastMonth.prescriptions} no mês anterior
+                            </p>
+                        </CardContent>
+                    </Card>
+                </Link>
             </div>
 
             {/* Chart + Recent prescriptions */}
@@ -338,9 +350,17 @@ export function DashboardClient({ data, shops }: Props) {
 
                 {/* Recent prescriptions */}
                 <Card className="lg:col-span-3">
-                    <CardHeader>
-                        <CardTitle>Últimas receitas</CardTitle>
-                        <CardDescription>As 5 receitas mais recentes</CardDescription>
+                    <CardHeader className="flex flex-row items-center justify-between">
+                        <div>
+                            <CardTitle>Últimas receitas</CardTitle>
+                            <CardDescription>As 5 receitas mais recentes</CardDescription>
+                        </div>
+                        <Link
+                            href="/admin/prescriptions"
+                            className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+                        >
+                            Ver todas <ArrowRight className="h-3 w-3" />
+                        </Link>
                     </CardHeader>
                     <CardContent>
                         {data.recentPrescriptions.length > 0 ? (

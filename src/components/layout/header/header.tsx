@@ -140,68 +140,68 @@ export function Header(props: HeaderProps) {
                     </div>
                 )}
                 <div className="justify-self-end flex gap-1 items-center shrink-0">
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button
-                                size={isMobile ? "icon" : "lg"}
-                                variant={'ghost'}
-                                className={cn("py-2", isMobile && "h-9 w-9 p-0")}
-                            >
-                                <Avatar className="h-8 w-8 rounded-lg">
-                                    <AvatarImage src={''} alt={userName} />
-                                    <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
-                                </Avatar>
-                                {!isMobile && (
-                                    <div className="grid flex-1 text-left text-sm leading-tight">
-                                        <span className="truncate font-medium">{userName}</span>
-                                        <span className="truncate text-xs">{session?.user.email}</span>
-                                    </div>
-                                )}
-                                {!isMobile && <ChevronsUpDown className="ml-auto size-4" />}
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent
-                            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-                            side={'bottom'}
-                            align="center"
-                            sideOffset={4}
-                        >
-                            <DropdownMenuLabel className="p-0 font-normal">
-                                <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                    {!isMobile && (
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button
+                                    size="lg"
+                                    variant={'ghost'}
+                                    className="py-2"
+                                >
                                     <Avatar className="h-8 w-8 rounded-lg">
+                                        <AvatarImage src={''} alt={userName} />
                                         <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
                                     </Avatar>
                                     <div className="grid flex-1 text-left text-sm leading-tight">
                                         <span className="truncate font-medium">{userName}</span>
                                         <span className="truncate text-xs">{session?.user.email}</span>
                                     </div>
-                                </div>
-                            </DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuGroup>
-                                <DropdownMenuItem onClick={() => router.push("/billing")}>
-                                    <Sparkles />
-                                    Gerenciar Assinatura
+                                    <ChevronsUpDown className="ml-auto size-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                                className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+                                side={'bottom'}
+                                align="center"
+                                sideOffset={4}
+                            >
+                                <DropdownMenuLabel className="p-0 font-normal">
+                                    <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                                        <Avatar className="h-8 w-8 rounded-lg">
+                                            <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
+                                        </Avatar>
+                                        <div className="grid flex-1 text-left text-sm leading-tight">
+                                            <span className="truncate font-medium">{userName}</span>
+                                            <span className="truncate text-xs">{session?.user.email}</span>
+                                        </div>
+                                    </div>
+                                </DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuGroup>
+                                    <DropdownMenuItem onClick={() => router.push("/billing")}>
+                                        <Sparkles />
+                                        Gerenciar Assinatura
+                                    </DropdownMenuItem>
+                                </DropdownMenuGroup>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuGroup>
+                                    <DropdownMenuItem onClick={() => router.push("/admin/profile")}>
+                                        <BadgeCheck />
+                                        Minha conta
+                                    </DropdownMenuItem>
+                                </DropdownMenuGroup>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem onClick={async () => {
+                                    const supabase = createClient();
+                                    await supabase.auth.signOut();
+                                    router.push("/");
+                                }}>
+                                    <LogOut />
+                                    Sair
                                 </DropdownMenuItem>
-                            </DropdownMenuGroup>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuGroup>
-                                <DropdownMenuItem onClick={() => router.push("/admin/profile")}>
-                                    <BadgeCheck />
-                                    Minha conta
-                                </DropdownMenuItem>
-                            </DropdownMenuGroup>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={async () => {
-                                const supabase = createClient();
-                                await supabase.auth.signOut();
-                                router.push("/");
-                            }}>
-                                <LogOut />
-                                Sair
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    )}
                     {isMobile && (
                         <Popover>
                             <PopoverTrigger asChild>
@@ -212,24 +212,65 @@ export function Header(props: HeaderProps) {
                                     <HamburgerIcon />
                                 </Button>
                             </PopoverTrigger>
-                            <PopoverContent align="start" className="w-48 p-2">
-                                <NavigationMenu className="max-w-none w-full">
-                                    <NavigationMenuList className="flex-col items-start gap-1 w-full">
-                                        {headerNavigationData.map((link, index) => (
-                                            <NavigationMenuItem key={index} className="w-full">
-                                                <Button
-                                                    variant={'ghost'}
-                                                    onClick={(e) => { e.preventDefault(); router.push(link.href) }}
-                                                    className={cn(
-                                                        "flex w-full items-center rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground cursor-pointer no-underline",
-                                                    )}
-                                                >
-                                                    {link.label}
-                                                </Button>
-                                            </NavigationMenuItem>
-                                        ))}
-                                    </NavigationMenuList>
-                                </NavigationMenu>
+                            <PopoverContent align="end" className="w-56 p-2">
+                                {/* User info */}
+                                <div className="flex items-center gap-2 px-2 py-2 text-sm">
+                                    <Avatar className="h-8 w-8 rounded-lg">
+                                        <AvatarImage src={''} alt={userName} />
+                                        <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
+                                    </Avatar>
+                                    <div className="grid flex-1 text-left text-sm leading-tight min-w-0">
+                                        <span className="truncate font-medium">{userName}</span>
+                                        <span className="truncate text-xs text-muted-foreground">{session?.user.email}</span>
+                                    </div>
+                                </div>
+                                <div className="my-1 h-px bg-border" />
+                                {/* Navigation */}
+                                <nav className="flex flex-col gap-0.5">
+                                    {headerNavigationData.map((link, index) => (
+                                        <Button
+                                            key={index}
+                                            variant="ghost"
+                                            onClick={() => router.push(link.href)}
+                                            className="justify-start w-full text-sm font-medium"
+                                        >
+                                            {link.label}
+                                        </Button>
+                                    ))}
+                                </nav>
+                                <div className="my-1 h-px bg-border" />
+                                {/* Account actions */}
+                                <nav className="flex flex-col gap-0.5">
+                                    <Button
+                                        variant="ghost"
+                                        onClick={() => router.push("/billing")}
+                                        className="justify-start w-full text-sm font-medium"
+                                    >
+                                        <Sparkles className="h-4 w-4 mr-2" />
+                                        Gerenciar Assinatura
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        onClick={() => router.push("/admin/profile")}
+                                        className="justify-start w-full text-sm font-medium"
+                                    >
+                                        <BadgeCheck className="h-4 w-4 mr-2" />
+                                        Minha conta
+                                    </Button>
+                                </nav>
+                                <div className="my-1 h-px bg-border" />
+                                <Button
+                                    variant="ghost"
+                                    onClick={async () => {
+                                        const supabase = createClient();
+                                        await supabase.auth.signOut();
+                                        router.push("/");
+                                    }}
+                                    className="justify-start w-full text-sm font-medium text-destructive hover:text-destructive"
+                                >
+                                    <LogOut className="h-4 w-4 mr-2" />
+                                    Sair
+                                </Button>
                             </PopoverContent>
                         </Popover>
                     )}
