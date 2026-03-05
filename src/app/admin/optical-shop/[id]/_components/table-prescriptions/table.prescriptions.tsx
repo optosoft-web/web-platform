@@ -18,9 +18,20 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 import { formatDate } from "@/lib/utils";
 import { Eye, Trash2 } from "lucide-react";
 import { DialogPrescriptionDetail } from "../dialog-prescription-detail/dialog.prescription-detail";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface PrescriptionRow {
     id: string;
@@ -40,6 +51,7 @@ interface PrescriptionRow {
 
 interface TablePrescriptionsProps {
     opticalShopId: string;
+    refreshKey?: number;
 }
 
 function formatEye(sph: string | null, cyl: string | null, axis: number | null) {
@@ -51,7 +63,7 @@ function formatEye(sph: string | null, cyl: string | null, axis: number | null) 
     return parts.join(" ");
 }
 
-export function TablePrescriptions({ opticalShopId }: TablePrescriptionsProps) {
+export function TablePrescriptions({ opticalShopId, refreshKey }: TablePrescriptionsProps) {
     const queryClient = useQueryClient();
     const [prescriptions, setPrescriptions] = useState<PrescriptionRow[]>([]);
     const [totalCount, setTotalCount] = useState(0);
@@ -92,7 +104,7 @@ export function TablePrescriptions({ opticalShopId }: TablePrescriptionsProps) {
             limit: pageSize,
             offset: page * pageSize,
         });
-    }, [opticalShopId, page]);
+    }, [opticalShopId, page, refreshKey]);
 
     useEffect(() => {
         fetchData();
@@ -100,18 +112,25 @@ export function TablePrescriptions({ opticalShopId }: TablePrescriptionsProps) {
 
     const pageCount = Math.ceil(totalCount / pageSize);
 
-    function handleDelete(id: string) {
-        if (confirm("Tem certeza que deseja excluir esta receita?")) {
-            deleteAction.execute({ id });
+    // ── Delete confirmation state ──
+    const [deleteTarget, setDeleteTarget] = useState<{ id: string; patientName: string } | null>(null);
+
+    function handleDelete(rx: { id: string; patientName: string }) {
+        setDeleteTarget(rx);
+    }
+
+    function confirmDelete() {
+        if (deleteTarget) {
+            deleteAction.execute({ id: deleteTarget.id });
+            setDeleteTarget(null);
         }
     }
 
     if (isLoading) {
         return (
-            <div className="space-y-3">
-                {Array.from({ length: 5 }).map((_, i) => (
-                    <Skeleton key={i} className="h-12 w-full" />
-                ))}
+            <div className="flex flex-col items-center justify-center py-20 gap-3 text-muted-foreground">
+                <Spinner className="size-8" />
+                <span className="text-sm">Carregando receitas...</span>
             </div>
         );
     }
@@ -172,7 +191,7 @@ export function TablePrescriptions({ opticalShopId }: TablePrescriptionsProps) {
                                             variant="ghost"
                                             size="icon"
                                             className="h-8 w-8 text-destructive hover:text-destructive"
-                                            onClick={() => handleDelete(rx.id)}
+                                            onClick={() => handleDelete({ id: rx.id, patientName: rx.patientName })}
                                             disabled={deleteAction.isPending}
                                         >
                                             <Trash2 className="h-4 w-4" />
@@ -216,6 +235,28 @@ export function TablePrescriptions({ opticalShopId }: TablePrescriptionsProps) {
                     if (!open) setDetailId(null);
                 }}
             />
+
+            {/* Delete confirmation */}
+            <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Excluir receita</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Tem certeza que deseja excluir a receita de{" "}
+                            <strong>{deleteTarget?.patientName}</strong>? Esta ação não pode ser desfeita.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={confirmDelete}
+                            className="bg-destructive text-white hover:bg-destructive/90"
+                        >
+                            Excluir
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </>
     );
 }

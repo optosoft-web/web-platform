@@ -21,10 +21,11 @@ import {
     ActionAutocompletePatients,
     ActionCreatePrescription,
     ActionCreatePrescriptionWithNewPatient,
+    ActionGetLatestPrescriptionByPatient,
 } from "@/server/actions/admin/prescription.actions";
 import { ActionGetProfile } from "@/server/actions/admin/profile.actions";
 import { cn } from "@/lib/utils";
-import { Check, Search, UserPlus, X } from "lucide-react";
+import { Check, Info, Search, UserPlus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DegreeCombobox } from "@/components/shared/degree-combobox/degree-combobox";
 import {
@@ -117,6 +118,9 @@ export function SheetCreatePrescription({
     const [notes, setNotes] = useState("");
     const [privateNotes, setPrivateNotes] = useState("");
 
+    // ── Pre-fill tracking ──
+    const [preFilledFromLatest, setPreFilledFromLatest] = useState(false);
+
     // ── Near vision (auto-calculated) ──
     const odNearSpherical = useMemo(() => {
         if (!odSpherical || !addition) return "";
@@ -147,6 +151,25 @@ export function SheetCreatePrescription({
         onSuccess: ({ data }) => {
             if (data?.optometristName) {
                 setPrescribedBy(data.optometristName);
+            }
+        },
+    });
+
+    // ── Latest prescription action (pre-fill degrees) ──
+    const latestPrescriptionAction = useAction(ActionGetLatestPrescriptionByPatient, {
+        onSuccess: ({ data }) => {
+            if (data) {
+                if (data.rightEyeSpherical) setOdSpherical(data.rightEyeSpherical);
+                if (data.rightEyeCylindrical) setOdCylindrical(data.rightEyeCylindrical);
+                if (data.rightEyeAxis != null) setOdAxis(String(data.rightEyeAxis));
+                if (data.leftEyeSpherical) setOeSpherical(data.leftEyeSpherical);
+                if (data.leftEyeCylindrical) setOeCylindrical(data.leftEyeCylindrical);
+                if (data.leftEyeAxis != null) setOeAxis(String(data.leftEyeAxis));
+                if (data.addition) setAddition(data.addition);
+                if (data.dnpRight) setDnpRight(data.dnpRight);
+                if (data.dnpLeft) setDnpLeft(data.dnpLeft);
+                if (data.prescribedBy) setPrescribedBy(data.prescribedBy);
+                setPreFilledFromLatest(true);
             }
         },
     });
@@ -198,6 +221,8 @@ export function SheetCreatePrescription({
             });
             setPatientQuery(preSelectedPatient.fullName);
             setIsNewPatient(false);
+            // Fetch the latest prescription to pre-fill degree fields
+            latestPrescriptionAction.execute({ patientId: preSelectedPatient.id });
         }
     }, [preSelectedPatient, open]);
 
@@ -232,6 +257,7 @@ export function SheetCreatePrescription({
         setPrescriptionDate(new Date().toISOString().split("T")[0]);
         setNotes("");
         setPrivateNotes("");
+        setPreFilledFromLatest(false);
         onOpenChange(false);
     }
 
@@ -240,6 +266,8 @@ export function SheetCreatePrescription({
         setPatientQuery(patient.fullName);
         setShowSuggestions(false);
         setIsNewPatient(false);
+        // Fetch the latest prescription to pre-fill degree fields
+        latestPrescriptionAction.execute({ patientId: patient.id });
     }
 
     function handleCreateNewPatient() {
@@ -253,6 +281,16 @@ export function SheetCreatePrescription({
         setIsNewPatient(false);
         setPatientQuery("");
         setSuggestions([]);
+        setPreFilledFromLatest(false);
+        setOdSpherical("");
+        setOdCylindrical("");
+        setOdAxis("");
+        setOeSpherical("");
+        setOeCylindrical("");
+        setOeAxis("");
+        setAddition("");
+        setDnpRight("");
+        setDnpLeft("");
     }
 
     function handleSubmit(e: React.FormEvent) {
@@ -392,6 +430,26 @@ export function SheetCreatePrescription({
                             </div>
                         )}
                     </div>
+
+                    {/* ── Pre-filled notice ── */}
+                    {preFilledFromLatest && selectedPatient && (
+                        <div className="flex items-start gap-2 rounded-md border border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/50 p-3">
+                            <Info className="h-4 w-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+                            <div className="flex-1 text-sm text-blue-700 dark:text-blue-300">
+                                Graus preenchidos com base na última receita do paciente. 
+                                Você pode alterar os valores antes de salvar.
+                            </div>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="h-5 w-5 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200"
+                                onClick={() => setPreFilledFromLatest(false)}
+                            >
+                                <X className="h-3 w-3" />
+                            </Button>
+                        </div>
+                    )}
 
                     {/* ── New patient fields ── */}
                     {isNewPatient && (

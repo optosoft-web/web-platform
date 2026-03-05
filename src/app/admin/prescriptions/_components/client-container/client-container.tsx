@@ -19,15 +19,33 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 import { formatDate } from "@/lib/utils";
-import { Eye, Plus, Store, Trash2, UserPlus } from "lucide-react";
+import { Eye, Filter, Plus, Store, Trash2, UserPlus, X } from "lucide-react";
 import { useDebounce } from "@/hooks/use-debounce";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { SheetCreatePrescription } from "@/app/admin/optical-shop/[id]/_components/sheet-create-prescription/sheet.create-prescription";
 import { DialogCreatePatient } from "@/app/admin/optical-shop/[id]/_components/dialog-create-patient/dialog.create-patient";
 import { DialogPrescriptionDetail } from "@/app/admin/optical-shop/[id]/_components/dialog-prescription-detail/dialog.prescription-detail";
@@ -85,6 +103,20 @@ export function ClientContainerPrescriptions({ shops }: ClientContainerPrescript
     const debouncedSearch = useDebounce(search, 400);
     const [detailId, setDetailId] = useState<string | null>(null);
 
+    // Filter state
+    const [filterShopId, setFilterShopId] = useState<string>("");
+    const [filterDateFrom, setFilterDateFrom] = useState<string>("");
+    const [filterDateTo, setFilterDateTo] = useState<string>("");
+    const [showFilters, setShowFilters] = useState(false);
+
+    const hasActiveFilters = !!filterShopId || !!filterDateFrom || !!filterDateTo;
+
+    function clearFilters() {
+        setFilterShopId("");
+        setFilterDateFrom("");
+        setFilterDateTo("");
+    }
+
     // Sheet state
     const [sheetOpen, setSheetOpen] = useState(false);
     const [selectedShopId, setSelectedShopId] = useState<string | null>(null);
@@ -125,23 +157,34 @@ export function ClientContainerPrescriptions({ shops }: ClientContainerPrescript
             limit: pageSize,
             offset: page * pageSize,
             search: debouncedSearch || undefined,
+            opticalShopId: filterShopId || undefined,
+            dateFrom: filterDateFrom || undefined,
+            dateTo: filterDateTo || undefined,
         });
-    }, [page, debouncedSearch]);
+    }, [page, debouncedSearch, filterShopId, filterDateFrom, filterDateTo]);
 
     useEffect(() => {
         fetchData();
     }, [fetchData]);
 
-    // Reset page when search changes
+    // Reset page when search/filters change
     useEffect(() => {
         setPage(0);
-    }, [debouncedSearch]);
+    }, [debouncedSearch, filterShopId, filterDateFrom, filterDateTo]);
 
     const pageCount = Math.ceil(totalCount / pageSize);
 
-    function handleDelete(id: string) {
-        if (confirm("Tem certeza que deseja excluir esta receita?")) {
-            deleteAction.execute({ id });
+    // ── Delete confirmation state ──
+    const [deleteTarget, setDeleteTarget] = useState<{ id: string; patientName: string } | null>(null);
+
+    function handleDelete(rx: { id: string; patientName: string }) {
+        setDeleteTarget(rx);
+    }
+
+    function confirmDelete() {
+        if (deleteTarget) {
+            deleteAction.execute({ id: deleteTarget.id });
+            setDeleteTarget(null);
         }
     }
 
@@ -153,7 +196,7 @@ export function ClientContainerPrescriptions({ shops }: ClientContainerPrescript
     return (
         <>
             {/* Header */}
-            <div className="flex flex-col gap-4 h-[128px] justify-center">
+            <div className="flex flex-col gap-4 justify-center">
                 <div className="flex justify-between items-center">
                     <div className="text-xl uppercase font-bold">Receitas</div>
                     <div className="flex gap-2">
@@ -216,23 +259,96 @@ export function ClientContainerPrescriptions({ shops }: ClientContainerPrescript
                         ) : null}
                     </div>
                 </div>
-                <div>
+
+                {/* Search + filter toggle */}
+                <div className="flex items-center gap-2">
                     <Input
-                        className="w-full md:max-w-md"
+                        className="flex-1 md:max-w-md"
                         type="search"
                         placeholder="Buscar por paciente..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
+                    <Button
+                        variant={hasActiveFilters ? "default" : "outline"}
+                        size="icon"
+                        onClick={() => setShowFilters((v) => !v)}
+                        title="Filtros"
+                    >
+                        <Filter className="h-4 w-4" />
+                    </Button>
+                    {hasActiveFilters && (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={clearFilters}
+                            className="text-xs"
+                        >
+                            <X className="h-3 w-3 mr-1" />
+                            Limpar
+                        </Button>
+                    )}
                 </div>
+
+                {/* Filters row */}
+                {showFilters && (
+                    <div className="flex flex-wrap items-end gap-3 rounded-md border p-3 bg-muted/30">
+                        {shops.length > 1 && (
+                            <div className="space-y-1">
+                                <label className="text-xs font-medium text-muted-foreground">
+                                    Ótica
+                                </label>
+                                <Select
+                                    value={filterShopId}
+                                    onValueChange={(v) =>
+                                        setFilterShopId(v === "all" ? "" : v)
+                                    }
+                                >
+                                    <SelectTrigger className="w-[180px] h-9">
+                                        <SelectValue placeholder="Todas" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">Todas</SelectItem>
+                                        {shops.map((shop) => (
+                                            <SelectItem key={shop.id} value={shop.id}>
+                                                {shop.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        )}
+                        <div className="space-y-1">
+                            <label className="text-xs font-medium text-muted-foreground">
+                                Data de
+                            </label>
+                            <Input
+                                type="date"
+                                className="w-[160px] h-9"
+                                value={filterDateFrom}
+                                onChange={(e) => setFilterDateFrom(e.target.value)}
+                            />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-medium text-muted-foreground">
+                                Data até
+                            </label>
+                            <Input
+                                type="date"
+                                className="w-[160px] h-9"
+                                value={filterDateTo}
+                                onChange={(e) => setFilterDateTo(e.target.value)}
+                            />
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Content */}
             {isLoading ? (
-                <div className="space-y-3">
-                    {Array.from({ length: 8 }).map((_, i) => (
-                        <Skeleton key={i} className="h-12 w-full" />
-                    ))}
+                <div className="flex flex-col items-center justify-center py-20 gap-3 text-muted-foreground">
+                    <Spinner className="size-8" />
+                    <span className="text-sm">Carregando receitas...</span>
                 </div>
             ) : prescriptions.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
@@ -293,7 +409,7 @@ export function ClientContainerPrescriptions({ shops }: ClientContainerPrescript
                                                     variant="ghost"
                                                     size="icon"
                                                     className="h-8 w-8 text-destructive hover:text-destructive"
-                                                    onClick={() => handleDelete(rx.id)}
+                                                    onClick={() => handleDelete({ id: rx.id, patientName: rx.patientName })}
                                                     disabled={deleteAction.isPending}
                                                 >
                                                     <Trash2 className="h-4 w-4" />
@@ -369,6 +485,28 @@ export function ClientContainerPrescriptions({ shops }: ClientContainerPrescript
                     }}
                 />
             )}
+
+            {/* Delete confirmation */}
+            <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Excluir receita</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Tem certeza que deseja excluir a receita de{" "}
+                            <strong>{deleteTarget?.patientName}</strong>? Esta ação não pode ser desfeita.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={confirmDelete}
+                            className="bg-destructive text-white hover:bg-destructive/90"
+                        >
+                            Excluir
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </>
     );
 }

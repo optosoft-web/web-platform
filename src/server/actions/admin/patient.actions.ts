@@ -369,6 +369,7 @@ const getAllPatientsSchema = z.object({
     limit: z.number().min(1).max(100).default(20),
     offset: z.number().min(0).default(0),
     search: z.string().optional(),
+    opticalShopId: z.string().uuid().optional(),
 });
 
 export const ActionGetAllPatients = createAction
@@ -386,6 +387,16 @@ export const ActionGetAllPatients = createAction
                         ilike(patientTable.phone, q),
                         ilike(patientTable.cpf, q),
                     )!
+                );
+            }
+
+            if (parsedInput.opticalShopId) {
+                conditions.push(
+                    sql`${patientTable.id} IN (
+                        SELECT ${patientOpticalShops.patientId}
+                        FROM ${patientOpticalShops}
+                        WHERE ${patientOpticalShops.opticalShopId} = ${parsedInput.opticalShopId}
+                    )`
                 );
             }
 

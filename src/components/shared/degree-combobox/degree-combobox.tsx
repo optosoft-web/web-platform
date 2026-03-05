@@ -76,12 +76,22 @@ export function DegreeCombobox({
         });
     }, [options]);
 
+    // Find the zero option (e.g. "+0.00" or "0") to use as default on mobile
+    const zeroOption = useMemo(() => {
+        return mobileOptions.find((opt) => {
+            const num = parseFloat(opt.replace(",", "."));
+            return num === 0;
+        }) ?? "";
+    }, [mobileOptions]);
+
     // On mobile, render a native <select> for better scroll UX
+    // Default to the zero option so the picker wheel opens centered on 0
     if (isMobile) {
+        const selectValue = value || zeroOption;
         return (
             <select
                 id={id}
-                value={value}
+                value={selectValue}
                 onChange={(e) => onValueChange(e.target.value)}
                 className={cn(
                     "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
@@ -89,7 +99,7 @@ export function DegreeCombobox({
                     className
                 )}
             >
-                <option value="">{placeholder}</option>
+                {!zeroOption && <option value="">{placeholder}</option>}
                 {mobileOptions.map((opt) => (
                     <option key={opt} value={opt}>
                         {opt}{suffix}

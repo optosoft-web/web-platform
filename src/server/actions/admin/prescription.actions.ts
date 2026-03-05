@@ -1,7 +1,7 @@
 "use server";
 
 import { z } from "zod";
-import { and, desc, eq, count, ilike } from "drizzle-orm";
+import { and, desc, eq, count, ilike, gte, lte, sql } from "drizzle-orm";
 import db from "@/server/database/index";
 import {
     prescriptionTable,
@@ -348,6 +348,9 @@ const getAllUserPrescriptionsSchema = z.object({
     limit: z.number().min(1).max(100).default(20),
     offset: z.number().min(0).default(0),
     search: z.string().optional(),
+    opticalShopId: z.string().uuid().optional(),
+    dateFrom: z.string().optional(),
+    dateTo: z.string().optional(),
 });
 
 export const ActionGetAllUserPrescriptions = createAction
@@ -359,6 +362,18 @@ export const ActionGetAllUserPrescriptions = createAction
 
             if (parsedInput.search && parsedInput.search.trim().length > 0) {
                 conditions.push(ilike(patientTable.fullName, `%${parsedInput.search.trim()}%`));
+            }
+
+            if (parsedInput.opticalShopId) {
+                conditions.push(eq(prescriptionTable.opticalShopId, parsedInput.opticalShopId));
+            }
+
+            if (parsedInput.dateFrom) {
+                conditions.push(gte(prescriptionTable.prescriptionDate, parsedInput.dateFrom));
+            }
+
+            if (parsedInput.dateTo) {
+                conditions.push(lte(prescriptionTable.prescriptionDate, parsedInput.dateTo));
             }
 
             const prescriptions = await db
@@ -398,6 +413,49 @@ export const ActionGetAllUserPrescriptions = createAction
         } catch (error) {
             console.error("Erro ao buscar prescrições:", error);
             throw new Error("Não foi possível buscar as prescrições.");
+        }
+    });
+
+// ── Get latest prescription for a patient ──
+
+const getLatestPrescriptionByPatientSchema = z.object({
+    patientId: z.string().uuid(),
+});
+
+export const ActionGetLatestPrescriptionByPatient = createAction
+    .inputSchema(getLatestPrescriptionByPatientSchema)
+    .use(authMiddleware)
+    .action(async ({ parsedInput, ctx }) => {
+        try {
+            const [result] = await db
+                .select({
+                    id: prescriptionTable.id,
+                    rightEyeSpherical: prescriptionTable.rightEyeSpherical,
+                    rightEyeCylindrical: prescriptionTable.rightEyeCylindrical,
+                    rightEyeAxis: prescriptionTable.rightEyeAxis,
+                    leftEyeSpherical: prescriptionTable.leftEyeSpherical,
+                    leftEyeCylindrical: prescriptionTable.leftEyeCylindrical,
+                    leftEyeAxis: prescriptionTable.leftEyeAxis,
+                    addition: prescriptionTable.addition,
+                    dnpRight: prescriptionTable.dnpRight,
+                    dnpLeft: prescriptionTable.dnpLeft,
+                    prescribedBy: prescriptionTable.prescribedBy,
+                    prescriptionDate: prescriptionTable.prescriptionDate,
+                })
+                .from(prescriptionTable)
+                .where(
+                    and(
+                        eq(prescriptionTable.patientId, parsedInput.patientId),
+                        eq(prescriptionTable.userId, ctx.user.id)
+                    )
+                )
+                .orderBy(desc(prescriptionTable.createdAt))
+                .limit(1);
+
+            return result ?? null;
+        } catch (error) {
+            console.error("Erro ao buscar última prescrição:", error);
+            return null;
         }
     });
 

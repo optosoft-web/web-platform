@@ -23,6 +23,7 @@ export function ClientContainerOpticalShop(props: iClientContainerOpticalShopPro
     const debouncedQuery = useDebounce(query, 300);
     const [sheetOpen, setSheetOpen] = useState(false);
     const [preSelectedPatient, setPreSelectedPatient] = useState<{ id: string; fullName: string } | null>(null);
+    const [prescriptionRefreshKey, setPrescriptionRefreshKey] = useState(0);
 
     function handleCreatePrescription(patient?: { id: string; fullName: string }) {
         setPreSelectedPatient(patient || null);
@@ -145,7 +146,7 @@ export function ClientContainerOpticalShop(props: iClientContainerOpticalShopPro
                 </TabsContent>
 
                 <TabsContent value="prescriptions">
-                    <TablePrescriptions opticalShopId={props.opticalShopData.id} />
+                    <TablePrescriptions opticalShopId={props.opticalShopData.id} refreshKey={prescriptionRefreshKey} />
                 </TabsContent>
             </Tabs>
 
@@ -154,7 +155,10 @@ export function ClientContainerOpticalShop(props: iClientContainerOpticalShopPro
                 open={sheetOpen}
                 onOpenChange={(open) => {
                     setSheetOpen(open);
-                    if (!open) setPreSelectedPatient(null);
+                    if (!open) {
+                        setPreSelectedPatient(null);
+                        setPrescriptionRefreshKey((k) => k + 1);
+                    }
                 }}
                 opticalShopId={props.opticalShopData.id}
                 preSelectedPatient={preSelectedPatient}
