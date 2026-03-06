@@ -109,6 +109,13 @@ export function Header(props: HeaderProps) {
         };
     }, []);
 
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+    function navigateMobile(href: string) {
+        setMobileMenuOpen(false);
+        router.push(href);
+    }
+
     const userName = displayName || session?.user.user_metadata?.full_name || session?.user.email?.split("@")[0] || "Usuário";
     const initials = userName
         .split(" ")
@@ -203,7 +210,7 @@ export function Header(props: HeaderProps) {
                         </DropdownMenu>
                     )}
                     {isMobile && (
-                        <Popover>
+                        <Popover open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
                             <PopoverTrigger asChild>
                                 <Button
                                     className="group h-full"
@@ -231,7 +238,7 @@ export function Header(props: HeaderProps) {
                                         <Button
                                             key={index}
                                             variant="ghost"
-                                            onClick={() => router.push(link.href)}
+                                            onClick={() => navigateMobile(link.href)}
                                             className="justify-start w-full text-sm font-medium"
                                         >
                                             {link.label}
@@ -243,7 +250,7 @@ export function Header(props: HeaderProps) {
                                 <nav className="flex flex-col gap-0.5">
                                     <Button
                                         variant="ghost"
-                                        onClick={() => router.push("/billing")}
+                                        onClick={() => navigateMobile("/billing")}
                                         className="justify-start w-full text-sm font-medium"
                                     >
                                         <Sparkles className="h-4 w-4 mr-2" />
@@ -251,7 +258,7 @@ export function Header(props: HeaderProps) {
                                     </Button>
                                     <Button
                                         variant="ghost"
-                                        onClick={() => router.push("/admin/profile")}
+                                        onClick={() => navigateMobile("/admin/profile")}
                                         className="justify-start w-full text-sm font-medium"
                                     >
                                         <BadgeCheck className="h-4 w-4 mr-2" />
@@ -262,6 +269,7 @@ export function Header(props: HeaderProps) {
                                 <Button
                                     variant="ghost"
                                     onClick={async () => {
+                                        setMobileMenuOpen(false);
                                         const supabase = createClient();
                                         await supabase.auth.signOut();
                                         router.push("/");

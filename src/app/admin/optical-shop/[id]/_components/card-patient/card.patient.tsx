@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { EllipsisVertical } from "lucide-react";
@@ -63,9 +62,7 @@ export function PatientCard({ patient, onCreatePrescription }: iPatientCardProps
         <Card className="w-full shadow-none p-0">
             <CardHeader className="flex flex-row items-center justify-between pt-6">
                 <CardTitle className="flex justify-between w-full items-center">
-                    <Link href={`/admin/patient/${patient.id}`} className="hover:underline">
-                        <h2 className="font-semibold text-xl truncate">{patient.fullName}</h2>
-                    </Link>
+                    <h2 className="font-semibold text-xl truncate">{patient.fullName}</h2>
                     <div>
                         <DropdownMenu>
                             <DropdownMenuTrigger className={cn(buttonVariants({ variant: 'ghost', size: 'icon' }), "h-8 w-8")}>

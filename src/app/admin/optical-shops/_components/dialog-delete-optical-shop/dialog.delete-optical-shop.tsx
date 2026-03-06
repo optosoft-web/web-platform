@@ -21,7 +21,7 @@ export function DialogDeleteOpticalShop(props: iDialogDeleteOpticalShopProps) {
                         <span className="font-bold">Todos os dados referente á ela serão removidos do nosso banco de dados</span>.
                     </DialogDescription>
                 </DialogHeader>
-                <FormDeleteOpticalShop formInitialValue={{ id: props.opticalShopData.id }} />
+                <FormDeleteOpticalShop formInitialValue={{ id: props.opticalShopData.id }} onSuccess={() => props.onOpenChange(false)} />
             </DialogContent>
         </Dialog>
     )

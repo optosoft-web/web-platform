@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { and, asc, count, eq, ilike } from "drizzle-orm";
 import db from "@/server/database/index";
-import { opticalShopTable, patientOpticalShops } from "@/server/database/tables";
+import { opticalShopTable, patientOpticalShops, prescriptionTable, teamMemberOpticalShopTable } from "@/server/database/tables";
 import { authMiddleware, createAction } from "@/lib/safe-action";
 import { iOpticalShopCardProps } from "@/app/admin/optical-shops/_components/card-optical-shop/card-optical-shop.types";
 import { formatDate } from "@/lib/utils";
@@ -169,7 +169,9 @@ export const ActionDeleteOpticalShop = createAction.inputSchema(deleteOpticalSho
         throw new Error("Ótica não encontrada ou acesso negado.");
       }
 
+      await db.delete(prescriptionTable).where(eq(prescriptionTable.opticalShopId, parsedInput.id));
       await db.delete(patientOpticalShops).where(eq(patientOpticalShops.opticalShopId, parsedInput.id));
+      await db.delete(teamMemberOpticalShopTable).where(eq(teamMemberOpticalShopTable.opticalShopId, parsedInput.id));
 
       await db.delete(opticalShopTable).where(eq(opticalShopTable.id, parsedInput.id));
 

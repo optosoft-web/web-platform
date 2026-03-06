@@ -29,6 +29,7 @@ export function FormDeleteOpticalShop(props: iFormDeleteOpticalShopProps) {
             toast.success("Deleção realizada com sucesso!");
             form.reset();
             await queryClient.invalidateQueries({ queryKey: ['opticalShopsDataForCards'] });
+            props.onSuccess?.();
         },
         onError: ({ error }) => {
             if (error.serverError) {

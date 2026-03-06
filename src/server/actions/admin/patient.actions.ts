@@ -352,6 +352,7 @@ export const deletePatient = createAction.inputSchema(deletePatientSchema).use(a
             }
 
             await db.delete(prescriptionTable).where(eq(prescriptionTable.patientId, parsedInput.id));
+            await db.delete(patientOpticalShops).where(eq(patientOpticalShops.patientId, parsedInput.id));
 
             await db.delete(patientTable).where(eq(patientTable.id, parsedInput.id));
 
