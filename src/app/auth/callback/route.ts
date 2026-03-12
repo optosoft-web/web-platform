@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
           mode: "subscription",
           line_items: [{ price: priceIdToGo, quantity: 1 }],
           client_reference_id: user.id,
-          success_url: `${appUrl}/admin/optical-shops`,
+          success_url: `${appUrl}/admin`,
           cancel_url: `${appUrl}/billing?checkout=cancelled`,
           customer_email: user.email ?? undefined,
           subscription_data: {
@@ -63,5 +63,5 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  return NextResponse.redirect(`${origin}/admin/optical-shops`);
+  return NextResponse.redirect(`${origin}/admin`);
 }

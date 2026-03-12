@@ -115,7 +115,7 @@ export function DialogPrescriptionDetail({
                     ${data.patientPhone ? `<div class="detail">Telefone: ${data.patientPhone}</div>` : ""}
                     ${data.patientCpf ? `<div class="detail">CPF: ${data.patientCpf}</div>` : ""}
                     ${data.patientRg ? `<div class="detail">RG: ${data.patientRg}</div>` : ""}
-                    <div class="detail">Data: ${formatDate(new Date(data.prescriptionDate))}</div>
+                    <div class="detail">Data: ${formatDate(data.prescriptionDate)}</div>
                 </div>
                 <table class="rx-table">
                     <thead>
@@ -211,7 +211,7 @@ export function DialogPrescriptionDetail({
                                 )}
                             </div>
                             <p className="text-sm text-muted-foreground">
-                                {data.opticalShopName} • {formatDate(new Date(data.prescriptionDate))}
+                                {data.opticalShopName} • {formatDate(data.prescriptionDate)}
                             </p>
                         </div>
 

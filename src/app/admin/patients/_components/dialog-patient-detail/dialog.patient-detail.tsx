@@ -108,7 +108,7 @@ export function DialogPatientDetail({
         ${data?.phone ? `<div class="detail">Telefone: ${data.phone}</div>` : ""}
         ${data?.cpf ? `<div class="detail">CPF: ${data.cpf}</div>` : ""}
         ${data?.rg ? `<div class="detail">RG: ${data.rg}</div>` : ""}
-        <div class="detail">Data: ${formatDate(new Date(rx.prescriptionDate))}</div>
+        <div class="detail">Data: ${formatDate(rx.prescriptionDate)}</div>
     </div>
     <table class="rx-table">
         <thead>
@@ -219,7 +219,7 @@ export function DialogPatientDetail({
                                 <div>
                                     <span className="text-muted-foreground">Nascimento:</span>{" "}
                                     <span className="font-medium">
-                                        {formatDate(new Date(data.dateOfBirth))}
+                                        {formatDate(data.dateOfBirth)}
                                     </span>
                                 </div>
                             )}
@@ -272,7 +272,7 @@ export function DialogPatientDetail({
                                             <div className="flex items-center justify-between px-3 py-2 bg-muted/40">
                                                 <div className="flex items-center gap-2">
                                                     <span className="font-medium">
-                                                        {formatDate(new Date(rx.prescriptionDate))}
+                                                        {formatDate(rx.prescriptionDate)}
                                                     </span>
                                                     {rx.prescribedBy && (
                                                         <span className="text-muted-foreground text-xs">

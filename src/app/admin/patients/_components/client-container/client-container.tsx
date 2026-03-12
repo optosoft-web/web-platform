@@ -240,7 +240,7 @@ export function ClientContainerPatients({ shops }: ClientContainerPatientsProps)
         <h2>${expandedPatientData.fullName}</h2>
         ${expandedPatientData.phone ? `<div class="detail">Telefone: ${expandedPatientData.phone}</div>` : ""}
         ${expandedPatientData.cpf ? `<div class="detail">CPF: ${expandedPatientData.cpf}</div>` : ""}
-        <div class="detail">Data: ${formatDate(new Date(rx.prescriptionDate))}</div>
+        <div class="detail">Data: ${formatDate(rx.prescriptionDate)}</div>
     </div>
     <table class="rx-table">
         <thead>
@@ -472,7 +472,7 @@ export function ClientContainerPatients({ shops }: ClientContainerPatientsProps)
                                             </TableCell>
                                             <TableCell className="hidden md:table-cell text-sm">
                                                 {patient.lastPrescriptionDate
-                                                    ? formatDate(new Date(patient.lastPrescriptionDate))
+                                                    ? formatDate(patient.lastPrescriptionDate)
                                                     : "-"}
                                             </TableCell>
                                         </TableRow>
@@ -507,7 +507,7 @@ export function ClientContainerPatients({ shops }: ClientContainerPatientsProps)
                                                                         <div className="flex items-center justify-between px-3 py-2 bg-muted/40">
                                                                             <div className="flex items-center gap-2">
                                                                                 <span className="font-medium">
-                                                                                    {formatDate(new Date(rx.prescriptionDate))}
+                                                                                    {formatDate(rx.prescriptionDate)}
                                                                                 </span>
                                                                                 {rx.prescribedBy && (
                                                                                     <span className="text-muted-foreground text-xs">

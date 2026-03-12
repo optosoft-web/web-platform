@@ -7,6 +7,8 @@ import {
     ActionMemberGetPatients,
     ActionMemberGetPatientDetail,
     ActionMemberUpdatePatient,
+    ActionMemberGetMyShops,
+    ActionMemberCreatePatient,
 } from "@/server/actions/member/member.actions";
 import {
     Table,
@@ -29,8 +31,16 @@ import {
     DialogFooter,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { formatDate } from "@/lib/utils";
-import { Eye, Pencil, Printer, Store } from "lucide-react";
+import { Eye, Pencil, Plus, Printer, Store } from "lucide-react";
 import { useDebounce } from "@/hooks/use-debounce";
 
 // ── Types ──
@@ -141,7 +151,7 @@ export function MemberPatientsClient() {
         ${detailData?.phone ? `<div class="detail">Telefone: ${detailData.phone}</div>` : ""}
         ${detailData?.cpf ? `<div class="detail">CPF: ${detailData.cpf}</div>` : ""}
         ${detailData?.rg ? `<div class="detail">RG: ${detailData.rg}</div>` : ""}
-        <div class="detail">Data: ${formatDate(new Date(rx.prescriptionDate))}</div>
+        <div class="detail">Data: ${formatDate(rx.prescriptionDate)}</div>
     </div>
     <table class="rx-table">
         <thead>
@@ -203,6 +213,19 @@ export function MemberPatientsClient() {
         contactInfo: "",
     });
 
+    // Create dialog
+    const [createOpen, setCreateOpen] = useState(false);
+    const [createData, setCreateData] = useState({
+        fullName: "",
+        phone: "",
+        cpf: "",
+        rg: "",
+        dateOfBirth: "",
+        contactInfo: "",
+        opticalShopId: "",
+    });
+    const [myShops, setMyShops] = useState<{ id: string; name: string }[]>([]);
+
     const pageSize = 15;
 
     const getAction = useAction(ActionMemberGetPatients, {
@@ -242,6 +265,23 @@ export function MemberPatientsClient() {
         },
     });
 
+    const shopsAction = useAction(ActionMemberGetMyShops, {
+        onSuccess: ({ data }) => {
+            if (data) setMyShops(data);
+        },
+    });
+
+    const createAction = useAction(ActionMemberCreatePatient, {
+        onSuccess: () => {
+            toast.success("Paciente criado com sucesso.");
+            setCreateOpen(false);
+            fetchData();
+        },
+        onError: () => {
+            toast.error("Erro ao criar paciente.");
+        },
+    });
+
     const fetchData = useCallback(() => {
         setIsLoading(true);
         getAction.execute({
@@ -258,6 +298,10 @@ export function MemberPatientsClient() {
     useEffect(() => {
         setPage(0);
     }, [debouncedSearch]);
+
+    useEffect(() => {
+        shopsAction.execute();
+    }, []);
 
     const pageCount = Math.ceil(totalCount / pageSize);
 
@@ -307,12 +351,42 @@ export function MemberPatientsClient() {
         });
     }
 
+    function handleCreateOpen() {
+        setCreateData({
+            fullName: "",
+            phone: "",
+            cpf: "",
+            rg: "",
+            dateOfBirth: "",
+            contactInfo: "",
+            opticalShopId: myShops.length === 1 ? myShops[0].id : "",
+        });
+        setCreateOpen(true);
+    }
+
+    function handleCreateSubmit(e: React.FormEvent) {
+        e.preventDefault();
+        createAction.execute({
+            fullName: createData.fullName,
+            phone: createData.phone || undefined,
+            cpf: createData.cpf || undefined,
+            rg: createData.rg || undefined,
+            dateOfBirth: createData.dateOfBirth || undefined,
+            contactInfo: createData.contactInfo || undefined,
+            opticalShopId: createData.opticalShopId,
+        });
+    }
+
     return (
         <>
             {/* Header */}
             <div className="flex flex-col gap-4 h-[128px] justify-center">
                 <div className="flex justify-between items-center">
                     <div className="text-xl uppercase font-bold">Pacientes</div>
+                    <Button onClick={handleCreateOpen}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Novo Paciente
+                    </Button>
                 </div>
                 <div>
                     <Input
@@ -511,7 +585,7 @@ export function MemberPatientsClient() {
                                     <div>
                                         <span className="text-muted-foreground">Nascimento:</span>{" "}
                                         <span className="font-medium">
-                                            {formatDate(new Date(detailData.dateOfBirth))}
+                                            {formatDate(detailData.dateOfBirth)}
                                         </span>
                                     </div>
                                 )}
@@ -559,7 +633,7 @@ export function MemberPatientsClient() {
                                                 <div className="flex items-center justify-between px-3 py-2 bg-muted/40">
                                                     <div className="flex items-center gap-2">
                                                         <span className="font-medium">
-                                                            {formatDate(new Date(rx.prescriptionDate))}
+                                                            {formatDate(rx.prescriptionDate)}
                                                         </span>
                                                         {rx.prescribedBy && (
                                                             <span className="text-muted-foreground text-xs">
@@ -631,6 +705,133 @@ export function MemberPatientsClient() {
                             Não foi possível carregar os dados do paciente.
                         </p>
                     )}
+                </DialogContent>
+            </Dialog>
+
+            {/* Create patient dialog */}
+            <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Novo Paciente</DialogTitle>
+                    </DialogHeader>
+                    <form onSubmit={handleCreateSubmit} className="space-y-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="create-fullName">Nome completo *</Label>
+                            <Input
+                                id="create-fullName"
+                                value={createData.fullName}
+                                onChange={(e) =>
+                                    setCreateData((prev) => ({ ...prev, fullName: e.target.value }))
+                                }
+                                required
+                                minLength={3}
+                            />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="create-phone">Telefone</Label>
+                                <Input
+                                    id="create-phone"
+                                    value={createData.phone}
+                                    onChange={(e) =>
+                                        setCreateData((prev) => ({ ...prev, phone: e.target.value }))
+                                    }
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="create-cpf">CPF</Label>
+                                <Input
+                                    id="create-cpf"
+                                    value={createData.cpf}
+                                    onChange={(e) =>
+                                        setCreateData((prev) => ({ ...prev, cpf: e.target.value }))
+                                    }
+                                />
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="create-rg">RG</Label>
+                                <Input
+                                    id="create-rg"
+                                    value={createData.rg}
+                                    onChange={(e) =>
+                                        setCreateData((prev) => ({ ...prev, rg: e.target.value }))
+                                    }
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="create-dob">Nascimento</Label>
+                                <Input
+                                    id="create-dob"
+                                    type="date"
+                                    value={createData.dateOfBirth}
+                                    onChange={(e) =>
+                                        setCreateData((prev) => ({
+                                            ...prev,
+                                            dateOfBirth: e.target.value,
+                                        }))
+                                    }
+                                />
+                            </div>
+                        </div>
+                        {myShops.length > 1 && (
+                            <div className="space-y-2">
+                                <Label>Ótica *</Label>
+                                <Select
+                                    value={createData.opticalShopId}
+                                    onValueChange={(v) =>
+                                        setCreateData((prev) => ({ ...prev, opticalShopId: v }))
+                                    }
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Selecione a ótica" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {myShops.map((shop) => (
+                                            <SelectItem key={shop.id} value={shop.id}>
+                                                {shop.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        )}
+                        {myShops.length === 1 && (
+                            <div className="space-y-2">
+                                <Label>Ótica</Label>
+                                <div className="flex items-center gap-2 text-sm">
+                                    <Store className="h-4 w-4 text-muted-foreground" />
+                                    {myShops[0].name}
+                                </div>
+                            </div>
+                        )}
+                        <div className="space-y-2">
+                            <Label htmlFor="create-contactInfo">Informações adicionais</Label>
+                            <Textarea
+                                id="create-contactInfo"
+                                value={createData.contactInfo}
+                                onChange={(e) =>
+                                    setCreateData((prev) => ({ ...prev, contactInfo: e.target.value }))
+                                }
+                            />
+                        </div>
+                        <DialogFooter>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => setCreateOpen(false)}
+                            >
+                                Cancelar
+                            </Button>
+                            <Button
+                                type="submit"
+                                disabled={createAction.isPending || !createData.opticalShopId}
+                            >
+                                {createAction.isPending ? "Criando..." : "Criar"}
+                            </Button>
+                        </DialogFooter>
+                    </form>
                 </DialogContent>
             </Dialog>
 

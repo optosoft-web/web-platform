@@ -388,3 +388,88 @@ export const ActionMemberUpdatePatient = createAction
             throw new Error("Não foi possível atualizar o paciente.");
         }
     });
+
+// ── Get optical shops the member has access to ──
+
+export const ActionMemberGetMyShops = createAction
+    .use(authMiddleware)
+    .action(async ({ ctx }) => {
+        const shopIds = await getMemberPermittedShopIds(ctx.user.id);
+        if (shopIds.length === 0) return [];
+
+        const shops = await db
+            .select({ id: opticalShopTable.id, name: opticalShopTable.name })
+            .from(opticalShopTable)
+            .where(inArray(opticalShopTable.id, shopIds));
+
+        return shops;
+    });
+
+// ── Create patient (member) ──
+
+const memberCreatePatientSchema = z.object({
+    fullName: z.string().min(3, "O nome completo é obrigatório."),
+    dateOfBirth: z.string().optional(),
+    contactInfo: z.string().optional(),
+    phone: z.string().optional(),
+    cpf: z.string().optional(),
+    rg: z.string().optional(),
+    opticalShopId: z.string().uuid(),
+});
+
+export const ActionMemberCreatePatient = createAction
+    .inputSchema(memberCreatePatientSchema)
+    .use(authMiddleware)
+    .action(async ({ parsedInput, ctx }) => {
+        const shopIds = await getMemberPermittedShopIds(ctx.user.id);
+        if (shopIds.length === 0) throw new Error("Sem permissão.");
+
+        if (!shopIds.includes(parsedInput.opticalShopId)) {
+            throw new Error("Sem permissão para esta ótica.");
+        }
+
+        // Get the subscription owner's ID from the team member record
+        const membership = await db
+            .select({ ownerId: teamMemberTable.ownerId })
+            .from(teamMemberTable)
+            .where(eq(teamMemberTable.memberUserId, ctx.user.id))
+            .limit(1);
+
+        if (membership.length === 0) throw new Error("Membro não encontrado.");
+
+        const ownerId = membership[0].ownerId;
+
+        try {
+            const newPatient = await db.transaction(async (tx) => {
+                const [createdPatient] = await tx
+                    .insert(patientTable)
+                    .values({
+                        userId: ownerId,
+                        fullName: parsedInput.fullName,
+                        dateOfBirth: parsedInput.dateOfBirth,
+                        contactInfo: parsedInput.contactInfo,
+                        phone: parsedInput.phone || null,
+                        cpf: parsedInput.cpf || null,
+                        rg: parsedInput.rg || null,
+                    })
+                    .returning();
+
+                if (!createdPatient) {
+                    tx.rollback();
+                    throw new Error("Não foi possível criar o paciente.");
+                }
+
+                await tx.insert(patientOpticalShops).values({
+                    patientId: createdPatient.id,
+                    opticalShopId: parsedInput.opticalShopId,
+                });
+
+                return createdPatient;
+            });
+
+            return newPatient;
+        } catch (error) {
+            console.error("Erro ao criar paciente (membro):", error);
+            throw new Error("Ocorreu um erro ao salvar o novo paciente.");
+        }
+    });

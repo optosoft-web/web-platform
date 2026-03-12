@@ -198,7 +198,7 @@ export function MemberPrescriptionsClient() {
                     ${data.patientPhone ? `<div class="detail">Telefone: ${data.patientPhone}</div>` : ""}
                     ${data.patientCpf ? `<div class="detail">CPF: ${data.patientCpf}</div>` : ""}
                     ${data.patientRg ? `<div class="detail">RG: ${data.patientRg}</div>` : ""}
-                    <div class="detail">Data: ${formatDate(new Date(data.prescriptionDate))}</div>
+                    <div class="detail">Data: ${formatDate(data.prescriptionDate)}</div>
                 </div>
                 <table class="rx-table">
                     <thead>
@@ -313,7 +313,7 @@ export function MemberPrescriptionsClient() {
                                             {rx.addition || "-"}
                                         </TableCell>
                                         <TableCell className="text-sm">
-                                            {formatDate(new Date(rx.prescriptionDate))}
+                                            {formatDate(rx.prescriptionDate)}
                                         </TableCell>
                                         <TableCell>
                                             <Button
@@ -410,7 +410,7 @@ export function MemberPrescriptionsClient() {
                                 </div>
                                 <p className="text-sm text-muted-foreground">
                                     {detailData.opticalShopName} •{" "}
-                                    {formatDate(new Date(detailData.prescriptionDate))}
+                                    {formatDate(detailData.prescriptionDate)}
                                 </p>
                             </div>
 

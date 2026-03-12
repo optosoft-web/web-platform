@@ -36,7 +36,7 @@ function formartPatientBirthDate(dateOfBirth: string | null) {
     let birthDateDisplay = '-';
 
     if (dateOfBirth) {
-        const formattedDateOfBirth = formatDate(new Date(dateOfBirth));
+        const formattedDateOfBirth = formatDate(dateOfBirth);
 
         const birthDate = new Date(dateOfBirth);
         const today = new Date();

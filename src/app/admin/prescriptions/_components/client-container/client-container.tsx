@@ -393,7 +393,7 @@ export function ClientContainerPrescriptions({ shops }: ClientContainerPrescript
                                             {rx.addition || "-"}
                                         </TableCell>
                                         <TableCell className="text-sm">
-                                            {formatDate(new Date(rx.prescriptionDate))}
+                                            {formatDate(rx.prescriptionDate)}
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex gap-1">

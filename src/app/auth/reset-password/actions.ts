@@ -45,7 +45,7 @@ export const ActionResetPassword = createAction
             }
 
             revalidatePath('/', 'layout');
-            redirect('/admin/optical-shops')
+            redirect('/admin')
         },
         {
             onError: async (args) => {

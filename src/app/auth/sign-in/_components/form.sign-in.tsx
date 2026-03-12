@@ -102,7 +102,7 @@ export function FormSignIn({
                 return;
             }
 
-            router.push('/admin/optical-shops')
+            router.push('/admin')
         },
         onError: ({ error }) => {
             if (error.serverError) {
