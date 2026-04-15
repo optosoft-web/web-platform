@@ -1,0 +1,239 @@
+{
+    "id": "in_1SEyKs57gtq6LWdrQR3Nqrfg",
+    "object": "invoice",
+    "account_country": "BR",
+    "account_name": "Integração",
+    "account_tax_ids": null,
+    "amount_due": 2900,
+    "amount_overpaid": 0,
+    "amount_paid": 2900,
+    "amount_remaining": 0,
+    "amount_shipping": 0,
+    "application": null,
+    "application_fee_amount": null,
+    "attempt_count": 0,
+    "attempted": true,
+    "auto_advance": false,
+    "automatic_tax": {
+        "disabled_reason": null,
+        "enabled": false,
+        "liability": null,
+        "provider": null,
+        "status": null
+    },
+    "automatically_finalizes_at": null,
+    "billing_reason": "subscription_create",
+    "charge": "ch_3SEyKs57gtq6LWdr1DGQNwcl",
+    "collection_method": "charge_automatically",
+    "created": 1759695314,
+    "currency": "brl",
+    "custom_fields": null,
+    "customer": "cus_TBL0x3RMT4eUtK",
+    "customer_address": {
+        "city": null,
+        "country": "BR",
+        "line1": null,
+        "line2": null,
+        "postal_code": null,
+        "state": null
+    },
+    "customer_email": "diegoalencar.jacober@gmail.com",
+    "customer_name": "DIeog Jacober",
+    "customer_phone": null,
+    "customer_shipping": null,
+    "customer_tax_exempt": "none",
+    "customer_tax_ids": [],
+    "default_payment_method": null,
+    "default_source": null,
+    "default_tax_rates": [],
+    "description": null,
+    "discount": null,
+    "discounts": [],
+    "due_date": null,
+    "effective_at": 1759695314,
+    "ending_balance": 0,
+    "footer": null,
+    "from_invoice": null,
+    "hosted_invoice_url": "https://invoice.stripe.com/i/acct_1SEbHQ57gtq6LWdr/test_YWNjdF8xU0ViSFE1N2d0cTZMV2RyLF9UQkwwb3A2ZkhmZzhET3hHZWQxRG5yVTZPN2ZHWFBnLDE1MDIzNjExOA0200P8TThDzi?s=ap",
+    "invoice_pdf": "https://pay.stripe.com/invoice/acct_1SEbHQ57gtq6LWdr/test_YWNjdF8xU0ViSFE1N2d0cTZMV2RyLF9UQkwwb3A2ZkhmZzhET3hHZWQxRG5yVTZPN2ZHWFBnLDE1MDIzNjExOA0200P8TThDzi/pdf?s=ap",
+    "issuer": {
+        "type": "self"
+    },
+    "last_finalization_error": null,
+    "latest_revision": null,
+    "lines": {
+        "object": "list",
+        "data": [
+            {
+                "id": "il_1SEyKs57gtq6LWdrn2W37CM1",
+                "object": "line_item",
+                "amount": 2900,
+                "amount_excluding_tax": 2900,
+                "currency": "brl",
+                "description": "1 × Optosoft Basic (a R$ 29.00 / month)",
+                "discount_amounts": [],
+                "discountable": true,
+                "discounts": [],
+                "invoice": "in_1SEyKs57gtq6LWdrQR3Nqrfg",
+                "livemode": false,
+                "metadata": {},
+                "parent": {
+                    "invoice_item_details": null,
+                    "subscription_item_details": {
+                        "invoice_item": null,
+                        "proration": false,
+                        "proration_details": {
+                            "credited_items": null
+                        },
+                        "subscription": "sub_1SEyKu57gtq6LWdro0dN8FPy",
+                        "subscription_item": "si_TBL0HOD9n2v1SD"
+                    },
+                    "type": "subscription_item_details"
+                },
+                "period": {
+                    "end": 1762373714,
+                    "start": 1759695314
+                },
+                "plan": {
+                    "id": "price_1SEbJe57gtq6LWdrM7i841z2",
+                    "object": "plan",
+                    "active": true,
+                    "aggregate_usage": null,
+                    "amount": 2900,
+                    "amount_decimal": "2900",
+                    "billing_scheme": "per_unit",
+                    "created": 1759606826,
+                    "currency": "brl",
+                    "interval": "month",
+                    "interval_count": 1,
+                    "livemode": false,
+                    "metadata": {},
+                    "meter": null,
+                    "nickname": null,
+                    "product": "prod_TAxELlVIR7xsju",
+                    "tiers_mode": null,
+                    "transform_usage": null,
+                    "trial_period_days": null,
+                    "usage_type": "licensed"
+                },
+                "pretax_credit_amounts": [],
+                "price": {
+                    "id": "price_1SEbJe57gtq6LWdrM7i841z2",
+                    "object": "price",
+                    "active": true,
+                    "billing_scheme": "per_unit",
+                    "created": 1759606826,
+                    "currency": "brl",
+                    "custom_unit_amount": null,
+                    "livemode": false,
+                    "lookup_key": null,
+                    "metadata": {},
+                    "nickname": null,
+                    "product": "prod_TAxELlVIR7xsju",
+                    "recurring": {
+                        "aggregate_usage": null,
+                        "interval": "month",
+                        "interval_count": 1,
+                        "meter": null,
+                        "trial_period_days": null,
+                        "usage_type": "licensed"
+                    },
+                    "tax_behavior": "unspecified",
+                    "tiers_mode": null,
+                    "transform_quantity": null,
+                    "type": "recurring",
+                    "unit_amount": 2900,
+                    "unit_amount_decimal": "2900"
+                },
+                "pricing": {
+                    "price_details": {
+                        "price": "price_1SEbJe57gtq6LWdrM7i841z2",
+                        "product": "prod_TAxELlVIR7xsju"
+                    },
+                    "type": "price_details",
+                    "unit_amount_decimal": "2900"
+                },
+                "proration": false,
+                "proration_details": {
+                    "credited_items": null
+                },
+                "quantity": 1,
+                "subscription": "sub_1SEyKu57gtq6LWdro0dN8FPy",
+                "subscription_item": "si_TBL0HOD9n2v1SD",
+                "tax_amounts": [],
+                "tax_rates": [],
+                "taxes": [],
+                "type": "subscription",
+                "unit_amount_excluding_tax": "2900"
+            }
+        ],
+        "has_more": false,
+        "total_count": 1,
+        "url": "/v1/invoices/in_1SEyKs57gtq6LWdrQR3Nqrfg/lines"
+    },
+    "livemode": false,
+    "metadata": {},
+    "next_payment_attempt": null,
+    "number": "XHUZA1KT-0001",
+    "on_behalf_of": null,
+    "paid": true,
+    "paid_out_of_band": false,
+    "parent": {
+        "quote_details": null,
+        "subscription_details": {
+            "metadata": {},
+            "subscription": "sub_1SEyKu57gtq6LWdro0dN8FPy"
+        },
+        "type": "subscription_details"
+    },
+    "payment_intent": "pi_3SEyKs57gtq6LWdr1marFUD9",
+    "payment_settings": {
+        "default_mandate": null,
+        "payment_method_options": {
+            "acss_debit": null,
+            "bancontact": null,
+            "card": {
+                "request_three_d_secure": "automatic"
+            },
+            "customer_balance": null,
+            "konbini": null,
+            "sepa_debit": null,
+            "us_bank_account": null
+        },
+        "payment_method_types": null
+    },
+    "period_end": 1759695314,
+    "period_start": 1759695314,
+    "post_payment_credit_notes_amount": 0,
+    "pre_payment_credit_notes_amount": 0,
+    "quote": null,
+    "receipt_number": null,
+    "rendering": null,
+    "shipping_cost": null,
+    "shipping_details": null,
+    "starting_balance": 0,
+    "statement_descriptor": null,
+    "status": "paid",
+    "status_transitions": {
+        "finalized_at": 1759695314,
+        "marked_uncollectible_at": null,
+        "paid_at": 1759695314,
+        "voided_at": null
+    },
+    "subscription": "sub_1SEyKu57gtq6LWdro0dN8FPy",
+    "subscription_details": {
+        "metadata": {}
+    },
+    "subtotal": 2900,
+    "subtotal_excluding_tax": 2900,
+    "tax": null,
+    "test_clock": null,
+    "total": 2900,
+    "total_discount_amounts": [],
+    "total_excluding_tax": 2900,
+    "total_pretax_credit_amounts": [],
+    "total_tax_amounts": [],
+    "total_taxes": [],
+    "transfer_data": null,
+    "webhooks_delivered_at": null
+}
