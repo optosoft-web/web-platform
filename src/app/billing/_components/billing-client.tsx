@@ -26,6 +26,7 @@ type BillingClientProps = {
     reason?: string;
     subscription: SubscriptionData;
     plans: Stripe.Product[];
+    trialDaysRemaining?: number;
 };
 
 const reasonMessages: Record<string, { title: string; description: string; icon: React.ReactNode }> = {
@@ -33,6 +34,11 @@ const reasonMessages: Record<string, { title: string; description: string; icon:
         title: "Você ainda não possui uma assinatura",
         description: "Escolha um plano abaixo para começar a usar o Optosoft.",
         icon: <CreditCard className="h-12 w-12 text-muted-foreground" />,
+    },
+    trial_expired: {
+        title: "Seu período gratuito de 7 dias expirou",
+        description: "Para continuar usando o Optosoft, escolha um plano abaixo.",
+        icon: <Clock className="h-12 w-12 text-yellow-500" />,
     },
     canceled: {
         title: "Sua assinatura foi cancelada",
@@ -61,7 +67,7 @@ const reasonMessages: Record<string, { title: string; description: string; icon:
     },
 };
 
-export function BillingClient({ reason, subscription, plans }: BillingClientProps) {
+export function BillingClient({ reason, subscription, plans, trialDaysRemaining = 0 }: BillingClientProps) {
     const router = useRouter();
 
     const isActive =
@@ -170,6 +176,15 @@ export function BillingClient({ reason, subscription, plans }: BillingClientProp
                 {message.icon}
                 <h1 className="text-2xl font-bold tracking-tight">{message.title}</h1>
                 <p className="text-muted-foreground text-lg">{message.description}</p>
+                {trialDaysRemaining > 0 && (
+                    <div className="flex items-center gap-2 rounded-md border border-primary/20 bg-primary/5 px-4 py-2 text-sm text-primary">
+                        <Clock className="h-4 w-4" />
+                        <span>
+                            Você ainda tem <strong>{trialDaysRemaining} {trialDaysRemaining === 1 ? "dia" : "dias"}</strong> de acesso gratuito.
+                            Assine agora para não perder seus dados!
+                        </span>
+                    </div>
+                )}
             </div>
 
             {/* If user has a Stripe customer, show portal button for payment issues */}

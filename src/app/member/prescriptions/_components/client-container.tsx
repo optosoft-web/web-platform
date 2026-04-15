@@ -221,7 +221,7 @@ export function MemberPrescriptionsClient() {
                         </tr>
                     </tbody>
                 </table>
-                ${data.addition ? `<p style="margin-bottom:24px;font-size:14px;"><strong>Adição:</strong> ${data.addition}</p>` : ""}
+                ${data.addition ? `<p style="margin-bottom:24px;font-size:14px;"><strong>Adição:</strong> ${data.addition}</p>` : `<p style="margin-bottom:24px;font-size:14px;"><strong>Adição:</strong> 0</p>`}
                 ${data.notes ? `<div class="notes"><h3>Observações</h3><p>${data.notes}</p></div>` : ""}
                 ${data.prescribedBy ? `
                 <div class="signature">
@@ -310,7 +310,7 @@ export function MemberPrescriptionsClient() {
                                             {formatEye(rx.leftEyeSpherical, rx.leftEyeCylindrical, rx.leftEyeAxis)}
                                         </TableCell>
                                         <TableCell className="hidden lg:table-cell text-sm">
-                                            {rx.addition || "-"}
+                                            {rx.addition || "0"}
                                         </TableCell>
                                         <TableCell className="text-sm">
                                             {formatDate(rx.prescriptionDate)}
@@ -453,12 +453,10 @@ export function MemberPrescriptionsClient() {
 
                             {/* Extra fields */}
                             <div className="grid grid-cols-2 gap-4 text-sm">
-                                {detailData.addition && (
-                                    <div>
-                                        <span className="text-muted-foreground">Adição:</span>{" "}
-                                        <span className="font-medium">{detailData.addition}</span>
-                                    </div>
-                                )}
+                                <div>
+                                    <span className="text-muted-foreground">Adição:</span>{" "}
+                                    <span className="font-medium">{detailData.addition || "0"}</span>
+                                </div>
                                 {detailData.prescribedBy && (
                                     <div>
                                         <span className="text-muted-foreground">Prescrito por:</span>{" "}

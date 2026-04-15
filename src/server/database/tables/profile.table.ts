@@ -12,7 +12,6 @@ export const profileTable = pgTable('profiles', {
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
     profileType: profileTypeEnum('type'),
     subscriptionId: text("subscription_id")
-        .notNull()
         .references(() => subscriptionTable.id, { onDelete: "cascade" }),
     active: boolean('active').default(true),
     userId: uuid("user_id")

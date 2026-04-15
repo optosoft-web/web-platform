@@ -52,16 +52,12 @@ export const ActionUpdateProfile = createAction
                 where: eq(subscriptionTable.userId, ctx.user.id),
             });
 
-            if (!subscription) {
-                throw new Error("Assinatura não encontrada. É necessário ter uma assinatura ativa.");
-            }
-
             const [created] = await db
                 .insert(profileTable)
                 .values({
                     id: ctx.user.id,
                     userId: ctx.user.id,
-                    subscriptionId: subscription.id,
+                    subscriptionId: subscription?.id ?? null,
                     profileType: "SUBSCRIPTION_OWNER",
                     fullName: parsedInput.fullName || null,
                     optometristName: parsedInput.optometristName || null,

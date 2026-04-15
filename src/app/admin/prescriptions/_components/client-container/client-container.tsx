@@ -21,7 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { formatDate } from "@/lib/utils";
-import { Eye, Filter, Plus, Store, Trash2, UserPlus, X } from "lucide-react";
+import { Eye, Filter, Pencil, Plus, Store, Trash2, UserPlus, X } from "lucide-react";
 import { useDebounce } from "@/hooks/use-debounce";
 import {
     Select,
@@ -47,6 +47,7 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { SheetCreatePrescription } from "@/app/admin/optical-shop/[id]/_components/sheet-create-prescription/sheet.create-prescription";
+import { SheetEditPrescription } from "@/app/admin/optical-shop/[id]/_components/sheet-edit-prescription/sheet.edit-prescription";
 import { DialogCreatePatient } from "@/app/admin/optical-shop/[id]/_components/dialog-create-patient/dialog.create-patient";
 import { DialogPrescriptionDetail } from "@/app/admin/optical-shop/[id]/_components/dialog-prescription-detail/dialog.prescription-detail";
 import Link from "next/link";
@@ -123,6 +124,9 @@ export function ClientContainerPrescriptions({ shops }: ClientContainerPrescript
 
     // Patient dialog state
     const [patientDialogShopId, setPatientDialogShopId] = useState<string | null>(null);
+
+    // Edit sheet state
+    const [editId, setEditId] = useState<string | null>(null);
 
     const pageSize = 15;
 
@@ -390,7 +394,7 @@ export function ClientContainerPrescriptions({ shops }: ClientContainerPrescript
                                             {formatEye(rx.leftEyeSpherical, rx.leftEyeCylindrical, rx.leftEyeAxis)}
                                         </TableCell>
                                         <TableCell className="hidden lg:table-cell text-sm">
-                                            {rx.addition || "-"}
+                                            {rx.addition || "0"}
                                         </TableCell>
                                         <TableCell className="text-sm">
                                             {formatDate(rx.prescriptionDate)}
@@ -404,6 +408,14 @@ export function ClientContainerPrescriptions({ shops }: ClientContainerPrescript
                                                     onClick={() => setDetailId(rx.id)}
                                                 >
                                                     <Eye className="h-4 w-4" />
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8"
+                                                    onClick={() => setEditId(rx.id)}
+                                                >
+                                                    <Pencil className="h-4 w-4" />
                                                 </Button>
                                                 <Button
                                                     variant="ghost"
@@ -457,6 +469,22 @@ export function ClientContainerPrescriptions({ shops }: ClientContainerPrescript
                 open={!!detailId}
                 onOpenChange={(open) => {
                     if (!open) setDetailId(null);
+                }}
+                onEdit={(id) => {
+                    setDetailId(null);
+                    setEditId(id);
+                }}
+            />
+
+            {/* Edit prescription sheet */}
+            <SheetEditPrescription
+                prescriptionId={editId}
+                open={!!editId}
+                onOpenChange={(open) => {
+                    if (!open) {
+                        setEditId(null);
+                        fetchData();
+                    }
                 }}
             />
 

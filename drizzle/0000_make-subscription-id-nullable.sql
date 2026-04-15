@@ -1,0 +1,1 @@
+ALTER TABLE "profiles" ALTER COLUMN "subscription_id" DROP NOT NULL;

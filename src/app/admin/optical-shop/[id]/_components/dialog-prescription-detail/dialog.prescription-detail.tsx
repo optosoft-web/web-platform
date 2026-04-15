@@ -14,12 +14,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { ActionGetPrescriptionById } from "@/server/actions/admin/prescription.actions";
 import { formatDate } from "@/lib/utils";
-import { Printer } from "lucide-react";
+import { Pencil, Printer } from "lucide-react";
 
 interface DialogPrescriptionDetailProps {
     prescriptionId: string | null;
     open: boolean;
     onOpenChange: (open: boolean) => void;
+    onEdit?: (id: string) => void;
 }
 
 interface PrescriptionDetail {
@@ -56,6 +57,7 @@ export function DialogPrescriptionDetail({
     prescriptionId,
     open,
     onOpenChange,
+    onEdit,
 }: DialogPrescriptionDetailProps) {
     const [data, setData] = useState<PrescriptionDetail | null>(null);
     const printRef = useRef<HTMLDivElement>(null);
@@ -144,7 +146,7 @@ export function DialogPrescriptionDetail({
                         </tr>
                     </tbody>
                 </table>
-                ${data.addition ? `<p style="margin-bottom:24px;font-size:14px;"><strong>Adição:</strong> ${data.addition}</p>` : ""}
+                ${data.addition ? `<p style="margin-bottom:24px;font-size:14px;"><strong>Adição:</strong> ${data.addition}</p>` : `<p style="margin-bottom:24px;font-size:14px;"><strong>Adição:</strong> 0</p>`}
                 ${data.notes ? `<div class="notes"><h3>Observações</h3><p>${data.notes}</p></div>` : ""}
                 ${data.prescribedBy ? `
                 <div class="signature">
@@ -175,15 +177,29 @@ export function DialogPrescriptionDetail({
                     <DialogTitle className="flex items-center justify-between">
                         <span>Detalhes da Receita</span>
                         {data && (
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={handlePrint}
-                                className="mr-6"
-                            >
-                                <Printer className="h-4 w-4 mr-1" />
-                                Imprimir
-                            </Button>
+                            <div className="flex gap-2 mr-6">
+                                {onEdit && (
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => {
+                                            onEdit(data.id);
+                                            onOpenChange(false);
+                                        }}
+                                    >
+                                        <Pencil className="h-4 w-4 mr-1" />
+                                        Editar
+                                    </Button>
+                                )}
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={handlePrint}
+                                >
+                                    <Printer className="h-4 w-4 mr-1" />
+                                    Imprimir
+                                </Button>
+                            </div>
                         )}
                     </DialogTitle>
                 </DialogHeader>
@@ -254,12 +270,10 @@ export function DialogPrescriptionDetail({
 
                         {/* Extra fields */}
                         <div className="grid grid-cols-2 gap-4 text-sm">
-                            {data.addition && (
-                                <div>
-                                    <span className="text-muted-foreground">Adição:</span>{" "}
-                                    <span className="font-medium">{data.addition}</span>
-                                </div>
-                            )}
+                            <div>
+                                <span className="text-muted-foreground">Adição:</span>{" "}
+                                <span className="font-medium">{data.addition || "0"}</span>
+                            </div>
                             {data.prescribedBy && (
                                 <div>
                                     <span className="text-muted-foreground">Prescrito por:</span>{" "}

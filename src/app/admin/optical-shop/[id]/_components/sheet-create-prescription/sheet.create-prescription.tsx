@@ -51,7 +51,7 @@ function generateOptions(min: number, max: number, step: number): string[] {
 const SPHERICAL_OPTIONS = generateOptions(-20, 20, 0.25);
 const CYLINDRICAL_OPTIONS = generateOptions(-6, 0, 0.25);
 const ADDITION_OPTIONS = generateOptions(0.25, 4, 0.25);
-const AXIS_OPTIONS = Array.from({ length: 181 }, (_, i) => String(i));
+
 
 /** Parse a diopter string like "+1.50" or "-2.25" to number */
 function parseDiopter(value: string): number {
@@ -557,14 +557,14 @@ export function SheetCreatePrescription({
                                             <Label htmlFor="od-axis" className="text-xs">
                                                 Eixo
                                             </Label>
-                                            <DegreeCombobox
+                                            <Input
                                                 id="od-axis"
-                                                options={AXIS_OPTIONS}
+                                                type="number"
+                                                min={0}
+                                                max={180}
                                                 value={odAxis}
-                                                onValueChange={setOdAxis}
+                                                onChange={(e) => setOdAxis(e.target.value)}
                                                 placeholder="0°"
-                                                searchPlaceholder="Ex: 90"
-                                                suffix="°"
                                             />
                                         </div>
                                     </div>
@@ -606,14 +606,14 @@ export function SheetCreatePrescription({
                                             <Label htmlFor="oe-axis" className="text-xs">
                                                 Eixo
                                             </Label>
-                                            <DegreeCombobox
+                                            <Input
                                                 id="oe-axis"
-                                                options={AXIS_OPTIONS}
+                                                type="number"
+                                                min={0}
+                                                max={180}
                                                 value={oeAxis}
-                                                onValueChange={setOeAxis}
+                                                onChange={(e) => setOeAxis(e.target.value)}
                                                 placeholder="0°"
-                                                searchPlaceholder="Ex: 90"
-                                                suffix="°"
                                             />
                                         </div>
                                     </div>

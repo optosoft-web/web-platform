@@ -20,8 +20,9 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { formatDate } from "@/lib/utils";
-import { Eye, Trash2 } from "lucide-react";
+import { Eye, Pencil, Trash2 } from "lucide-react";
 import { DialogPrescriptionDetail } from "../dialog-prescription-detail/dialog.prescription-detail";
+import { SheetEditPrescription } from "../sheet-edit-prescription/sheet.edit-prescription";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -70,6 +71,7 @@ export function TablePrescriptions({ opticalShopId, refreshKey }: TablePrescript
     const [page, setPage] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
     const [detailId, setDetailId] = useState<string | null>(null);
+    const [editId, setEditId] = useState<string | null>(null);
     const pageSize = 10;
 
     const getAction = useAction(ActionGetPrescriptions, {
@@ -169,7 +171,7 @@ export function TablePrescriptions({ opticalShopId, refreshKey }: TablePrescript
                                     {formatEye(rx.leftEyeSpherical, rx.leftEyeCylindrical, rx.leftEyeAxis)}
                                 </TableCell>
                                 <TableCell className="hidden lg:table-cell text-sm">
-                                    {rx.addition || "-"}
+                                    {rx.addition || "0"}
                                 </TableCell>
                                 <TableCell className="hidden lg:table-cell text-sm">
                                     {rx.prescribedBy || "-"}
@@ -186,6 +188,14 @@ export function TablePrescriptions({ opticalShopId, refreshKey }: TablePrescript
                                             onClick={() => setDetailId(rx.id)}
                                         >
                                             <Eye className="h-4 w-4" />
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-8 w-8"
+                                            onClick={() => setEditId(rx.id)}
+                                        >
+                                            <Pencil className="h-4 w-4" />
                                         </Button>
                                         <Button
                                             variant="ghost"
@@ -233,6 +243,22 @@ export function TablePrescriptions({ opticalShopId, refreshKey }: TablePrescript
                 open={!!detailId}
                 onOpenChange={(open) => {
                     if (!open) setDetailId(null);
+                }}
+                onEdit={(id) => {
+                    setDetailId(null);
+                    setEditId(id);
+                }}
+            />
+
+            {/* Edit prescription sheet */}
+            <SheetEditPrescription
+                prescriptionId={editId}
+                open={!!editId}
+                onOpenChange={(open) => {
+                    if (!open) {
+                        setEditId(null);
+                        fetchData();
+                    }
                 }}
             />
 
